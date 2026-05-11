@@ -9,10 +9,10 @@
     <Project Path="src/delta/Mpt.Framework.Delta/Mpt.Framework.Delta.csproj" />
     <Project Path="src/delta/Mpt.Framework.Delta.Validation/Mpt.Framework.Delta.Validation.csproj" />
   </Folder>
-  <Folder Name="/src/operations/">
-    <Project Path="src/operations/Mpt.Framework.Operations.Abstractions/Mpt.Framework.Operations.Abstractions.csproj" />
-    <Project Path="src/operations/Mpt.Framework.Operations/Mpt.Framework.Operations.csproj" />
-    <Project Path="src/operations/Mpt.Framework.Operations.EFCore/Mpt.Framework.Operations.EFCore.csproj" />
+  <Folder Name="/src/operation/">
+    <Project Path="src/operation/Mpt.Framework.Operation.Abstractions/Mpt.Framework.Operation.Abstractions.csproj" />
+    <Project Path="src/operation/Mpt.Framework.Operation/Mpt.Framework.Operation.csproj" />
+    <Project Path="src/operation/Mpt.Framework.Operation.EFCore/Mpt.Framework.Operation.EFCore.csproj" />
   </Folder>
   <Folder Name="/src/messagehub/">
     <Project Path="src/messagehub/Mpt.Framework.MessageHub.Abstractions/Mpt.Framework.MessageHub.Abstractions.csproj" />
@@ -23,8 +23,8 @@
     <Project Path="tests/delta/Mpt.Framework.Delta.Tests/Mpt.Framework.Delta.Tests.csproj" />
     <Project Path="tests/delta/Mpt.Framework.Delta.Validation.Tests/Mpt.Framework.Delta.Validation.Tests.csproj" />
   </Folder>
-  <Folder Name="/tests/operations/">
-    <Project Path="tests/operations/Mpt.Framework.Operations.Tests/Mpt.Framework.Operations.Tests.csproj" />
+  <Folder Name="/tests/operation/">
+    <Project Path="tests/operation/Mpt.Framework.Operation.Tests/Mpt.Framework.Operation.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/messagehub/">
     <Project Path="tests/messagehub/Mpt.Framework.MessageHub.Tests/Mpt.Framework.MessageHub.Tests.csproj" />
