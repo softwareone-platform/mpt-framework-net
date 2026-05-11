@@ -1,11 +1,11 @@
-# Mpt.Framework.Operations.EntityFrameworkCore
+# Mpt.Framework.Operations.EFCore
 
 SQL Server persistence add-on for [`Mpt.Framework.Operations`](https://www.nuget.org/packages/Mpt.Framework.Operations). The main package ships with in-memory persistence; install this companion to keep saga state across process restarts.
 
 ## Install
 
 ```
-dotnet add package Mpt.Framework.Operations.EntityFrameworkCore
+dotnet add package Mpt.Framework.Operations.EFCore
 ```
 
 Depends on **EF Core 10.x** and **MassTransit.EntityFrameworkCore 8.x**.

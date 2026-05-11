@@ -4,23 +4,23 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>Mpt.Framework.Operations.EntityFrameworkCore</RootNamespace>
-    <AssemblyName>Mpt.Framework.Operations.EntityFrameworkCore</AssemblyName>
+    <RootNamespace>Mpt.Framework.Operations</RootNamespace>
+    <AssemblyName>Mpt.Framework.Operations.Abstractions</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <PackageId>Mpt.Framework.Operations.EntityFrameworkCore</PackageId>
-    <Title>Mpt.Framework.Operations.EntityFrameworkCore</Title>
-    <Description>SQL Server persistence add-on for Mpt.Framework.Operations. Provides an EF Core saga repository, a model-builder extension to add the operations entity to your DbContext, and a fluent UseSqlServerPersistence() configuration helper.</Description>
+    <PackageId>Mpt.Framework.Operations.Abstractions</PackageId>
+    <Title>Mpt.Framework.Operations.Abstractions</Title>
+    <Description>Abstractions for Mpt.Framework.Operations — the operation base class, contract marker, dispatcher interface, context interfaces, and result POCOs. Reference this package from your Application layer to define and dispatch operations without taking a dependency on MassTransit or EF Core; install Mpt.Framework.Operations in your composition root to wire up the engine.</Description>
     <Authors>SoftwareOne and the Mpt.Framework contributors</Authors>
     <Company>SoftwareOne</Company>
     <Copyright>Copyright 2026 SoftwareOne and the Mpt.Framework contributors</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>operations;saga;masstransit;entityframeworkcore;efcore;sqlserver</PackageTags>
+    <PackageTags>operations;abstractions;saga;background;jobs;tasks</PackageTags>
     <PackageProjectUrl>https://github.com/SoftwareONE/mpt-framework-net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SoftwareONE/mpt-framework-net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -30,15 +30,6 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="" Condition="Exists('README.md')" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="MassTransit.EntityFrameworkCore" Version="[8.3.0,9.0.0)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="[10.0.0,11.0.0)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Mpt.Framework.Operations\Mpt.Framework.Operations.csproj" />
   </ItemGroup>
 
 </Project>

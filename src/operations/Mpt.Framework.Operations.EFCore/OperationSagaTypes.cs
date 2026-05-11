@@ -1,4 +1,4 @@
-namespace Mpt.Framework.Operations.EntityFrameworkCore;
+namespace Mpt.Framework.Operations.EFCore;
 
 internal class OperationSagaTypes(IEnumerable<(Type, string)> types)
 {

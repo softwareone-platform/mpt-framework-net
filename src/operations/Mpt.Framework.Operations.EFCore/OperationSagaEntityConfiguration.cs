@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace Mpt.Framework.Operations.EntityFrameworkCore;
+namespace Mpt.Framework.Operations.EFCore;
 
 [ExcludeFromCodeCoverage(Justification = "Configuration")]
 public class OperationSagaEntityConfiguration : IEntityTypeConfiguration<OperationSaga>

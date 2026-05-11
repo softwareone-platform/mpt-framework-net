@@ -1,4 +1,4 @@
-using Mpt.Framework.Operations.EntityFrameworkCore;
+using Mpt.Framework.Operations.EFCore;
 
 namespace Mpt.Framework.Operations;
 

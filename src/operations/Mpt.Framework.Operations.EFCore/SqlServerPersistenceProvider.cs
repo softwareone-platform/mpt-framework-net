@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Mpt.Framework.Operations.Configuration;
 
-namespace Mpt.Framework.Operations.EntityFrameworkCore;
+namespace Mpt.Framework.Operations.EFCore;
 
 internal sealed class SqlServerPersistenceProvider(string connectionString) : IOperationsPersistenceProvider
 {

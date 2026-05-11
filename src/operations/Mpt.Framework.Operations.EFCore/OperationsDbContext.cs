@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace Mpt.Framework.Operations.EntityFrameworkCore;
+namespace Mpt.Framework.Operations.EFCore;
 
 internal class OperationsDbContext(DbContextOptions<OperationsDbContext> options, OperationSagaTypes sagaTypes) : DbContext(options)
 {

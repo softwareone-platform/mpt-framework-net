@@ -40,8 +40,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Mpt.Framework.Operations.Abstractions\Mpt.Framework.Operations.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Mpt.Framework.Operations.Tests" />
-    <InternalsVisibleTo Include="Mpt.Framework.Operations.EntityFrameworkCore" />
+    <InternalsVisibleTo Include="Mpt.Framework.Operations.EFCore" />
   </ItemGroup>
 
 </Project>
