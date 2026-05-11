@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Mpt.Framework.MessageHub</RootNamespace>
+    <AssemblyName>Mpt.Framework.MessageHub.Abstractions</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mpt.Framework.MessageHub.Abstractions</PackageId>
+    <Title>Mpt.Framework.MessageHub.Abstractions</Title>
+    <Description>Abstractions for Mpt.Framework.MessageHub — the EventMessage payload type, input-stream provider abstractions, and the IMessageHubPublisher interface. Reference this package from your Application layer to define streams and publish events without taking a dependency on MassTransit; install Mpt.Framework.MessageHub in your composition root to wire up the engine.</Description>
+    <Authors>SoftwareOne and the Mpt.Framework contributors</Authors>
+    <Company>SoftwareOne</Company>
+    <Copyright>Copyright 2026 SoftwareOne and the Mpt.Framework contributors</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>messaging;eventbus;abstractions;publish;subscribe;pubsub</PackageTags>
+    <PackageProjectUrl>https://github.com/SoftwareONE/mpt-framework-net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoftwareONE/mpt-framework-net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" Condition="Exists('README.md')" />
+  </ItemGroup>
+
+</Project>

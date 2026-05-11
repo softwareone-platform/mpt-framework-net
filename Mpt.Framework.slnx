@@ -14,6 +14,10 @@
     <Project Path="src/operations/Mpt.Framework.Operations/Mpt.Framework.Operations.csproj" />
     <Project Path="src/operations/Mpt.Framework.Operations.EFCore/Mpt.Framework.Operations.EFCore.csproj" />
   </Folder>
+  <Folder Name="/src/messagehub/">
+    <Project Path="src/messagehub/Mpt.Framework.MessageHub.Abstractions/Mpt.Framework.MessageHub.Abstractions.csproj" />
+    <Project Path="src/messagehub/Mpt.Framework.MessageHub/Mpt.Framework.MessageHub.csproj" />
+  </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/delta/">
     <Project Path="tests/delta/Mpt.Framework.Delta.Tests/Mpt.Framework.Delta.Tests.csproj" />
@@ -21,5 +25,8 @@
   </Folder>
   <Folder Name="/tests/operations/">
     <Project Path="tests/operations/Mpt.Framework.Operations.Tests/Mpt.Framework.Operations.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/messagehub/">
+    <Project Path="tests/messagehub/Mpt.Framework.MessageHub.Tests/Mpt.Framework.MessageHub.Tests.csproj" />
   </Folder>
 </Solution>
