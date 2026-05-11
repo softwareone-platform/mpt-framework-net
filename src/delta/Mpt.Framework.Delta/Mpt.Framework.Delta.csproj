@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Mpt.Framework.Delta</RootNamespace>
+    <AssemblyName>Mpt.Framework.Delta</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mpt.Framework.Delta</PackageId>
+    <Title>Mpt.Framework.Delta</Title>
+    <Description>Strongly-typed JSON partial update (delta) model that lets APIs distinguish between an absent property and a property explicitly set to null. Core package — has zero third-party runtime dependencies. For FluentValidation integration use Mpt.Framework.Delta.Validation.</Description>
+    <Authors>SoftwareOne and the Mpt.Framework contributors</Authors>
+    <Company>SoftwareOne</Company>
+    <Copyright>Copyright 2026 SoftwareOne and the Mpt.Framework contributors</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>json;partial;patch;delta</PackageTags>
+    <PackageProjectUrl>https://github.com/SoftwareONE/mpt-framework-net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoftwareONE/mpt-framework-net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" Condition="Exists('README.md')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mpt.Framework.Delta.Tests" />
+  </ItemGroup>
+
+</Project>
