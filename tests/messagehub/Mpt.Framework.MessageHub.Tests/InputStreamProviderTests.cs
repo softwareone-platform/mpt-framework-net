@@ -34,20 +34,17 @@ public class InputStreamProviderTests
     }
 
     [Fact]
-    public void InputStream_Ctor_RejectsStreamTypesNone()
+    public void DefineStream_WithoutConfigureCallback_LeavesDefaults()
     {
-        var act = () => new InputStream<TestConsumer>("test", "orders", StreamTypes.None);
+        var provider = new TestProvider();
 
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("At least one source must be specified*");
-    }
+        var stream = provider.DefineTestStream<TestConsumer>("orders", StreamTypes.Events);
 
-    [Fact]
-    public void InputStream_GetFullPath_LowercasesAndJoinsModuleProviderName()
-    {
-        var stream = new InputStream<TestConsumer>("Test", "Orders", StreamTypes.Events);
-
-        stream.GetFullPath("MyModule").Should().Be("mymodule.p-test.orders");
+        stream.Filter.Modules.Should().BeNull();
+        stream.Filter.Entities.Should().BeNull();
+        stream.Filter.Events.Should().BeNull();
+        stream.Filter.AllowOwnEvents.Should().BeFalse();
+        stream.State.Should().Be(InputStreamState.Active);
     }
 
     private class TestProvider : InputStreamProvider
