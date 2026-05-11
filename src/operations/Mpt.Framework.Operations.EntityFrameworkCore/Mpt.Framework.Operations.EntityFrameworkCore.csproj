@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Mpt.Framework.Operations.EntityFrameworkCore</RootNamespace>
+    <AssemblyName>Mpt.Framework.Operations.EntityFrameworkCore</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mpt.Framework.Operations.EntityFrameworkCore</PackageId>
+    <Title>Mpt.Framework.Operations.EntityFrameworkCore</Title>
+    <Description>SQL Server persistence add-on for Mpt.Framework.Operations. Provides an EF Core saga repository, a model-builder extension to add the operations entity to your DbContext, and a fluent UseSqlServerPersistence() configuration helper.</Description>
+    <Authors>SoftwareOne and the Mpt.Framework contributors</Authors>
+    <Company>SoftwareOne</Company>
+    <Copyright>Copyright 2026 SoftwareOne and the Mpt.Framework contributors</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>operations;saga;masstransit;entityframeworkcore;efcore;sqlserver</PackageTags>
+    <PackageProjectUrl>https://github.com/SoftwareONE/mpt-framework-net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoftwareONE/mpt-framework-net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" Condition="Exists('README.md')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit.EntityFrameworkCore" Version="[8.3.0,9.0.0)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="[10.0.0,11.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mpt.Framework.Operations\Mpt.Framework.Operations.csproj" />
+  </ItemGroup>
+
+</Project>

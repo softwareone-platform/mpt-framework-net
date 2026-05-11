@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Mpt.Framework.Operations</RootNamespace>
+    <AssemblyName>Mpt.Framework.Operations</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mpt.Framework.Operations</PackageId>
+    <Title>Mpt.Framework.Operations</Title>
+    <Description>Operations engine for orchestrating long-running asynchronous work over MassTransit. Provides a strongly-typed Operation&lt;TContract, TTask&gt; programming model, dispatcher API, and ready-to-use in-memory and Azure Service Bus transports. For SQL Server (Entity Framework Core) persistence use Mpt.Framework.Operations.EntityFrameworkCore.</Description>
+    <Authors>SoftwareOne and the Mpt.Framework contributors</Authors>
+    <Company>SoftwareOne</Company>
+    <Copyright>Copyright 2026 SoftwareOne and the Mpt.Framework contributors</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>operations;saga;masstransit;background;jobs;tasks</PackageTags>
+    <PackageProjectUrl>https://github.com/SoftwareONE/mpt-framework-net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoftwareONE/mpt-framework-net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" Condition="Exists('README.md')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="[8.3.0,9.0.0)" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="[8.3.0,9.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="[10.0.0,11.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="[10.0.0,11.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mpt.Framework.Operations.Tests" />
+    <InternalsVisibleTo Include="Mpt.Framework.Operations.EntityFrameworkCore" />
+  </ItemGroup>
+
+</Project>
