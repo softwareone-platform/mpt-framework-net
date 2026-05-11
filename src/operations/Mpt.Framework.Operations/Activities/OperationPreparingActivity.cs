@@ -124,7 +124,11 @@ internal class OperationPreparingActivity<TOperation, TTask, TSaga>(IOperationMe
             }
 
             SetSagaOperationData(context);
-            context.Saga.TaskStates = new OperationStateArray(total).Data;
+            // Note: OperationStateArray requires length > 0 — gate creation so the zero-tasks
+            // case can fall through to the NoTasks failure check below instead of being caught
+            // and reported as ErrorPreparingTasks.
+            if (total > 0)
+                context.Saga.TaskStates = new OperationStateArray(total).Data;
         }
         catch (Exception exc)
         {

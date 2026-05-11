@@ -1,19 +1,23 @@
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using Mpt.Framework.Operations;
 using Mpt.Framework.Operations.Configuration;
 
 namespace Mpt.Framework.Operations.Tests.Functionality;
 
+/// <summary>
+/// Spins up a self-contained in-memory operations engine in DI, dispatches a single operation of the
+/// requested type, and exposes hooks so the <see cref="TestOperation"/> handler can report task /
+/// operation completion back to the test code.
+/// </summary>
 public class OperationContext<TOperation> : IAsyncDisposable
     where TOperation : IOperationContract, new()
 {
-    private volatile int _succeded;
+    private volatile int _succeeded;
     private volatile int _failed;
 
     private IOperationDispatcher? _dispatcher;
     private IBusControl? _busControl;
-    private Guid? _opearationId;
+    private Guid? _operationId;
 
     public void ConfigureOperation(Action<OperationConfig> configure)
     {
@@ -23,15 +27,13 @@ public class OperationContext<TOperation> : IAsyncDisposable
 
     public async Task StartAsync()
     {
-        // Arrange
         var provider = MakeOperationsProvider();
         var scope = provider.CreateScope();
         _dispatcher = scope.ServiceProvider.GetRequiredService<IOperationDispatcher>();
         _busControl = (provider.GetRequiredService<IOperationsBus>() as IBusControl)!;
 
-        // Act
         await _busControl.StartAsync();
-        _opearationId = await _dispatcher.DispatchAsync(new TOperation(), CancellationToken.None);
+        _operationId = await _dispatcher.DispatchAsync(new TOperation(), CancellationToken.None);
     }
 
     public Task WaitForCompletion(int timeoutMs)
@@ -39,34 +41,25 @@ public class OperationContext<TOperation> : IAsyncDisposable
 
     public async Task CancelAsync()
     {
-        if (_dispatcher == null || !_opearationId.HasValue)
-        {
+        if (_dispatcher == null || !_operationId.HasValue)
             return;
-        }
 
-        await _dispatcher.CancelAsync<TOperation>(_opearationId.Value, CancellationToken.None);
+        await _dispatcher.CancelAsync<TOperation>(_operationId.Value, CancellationToken.None);
     }
 
     public void ReportTaskComplete(bool isSuccess)
     {
         if (isSuccess)
-        {
-            _succeded++;
-        }
+            _succeeded++;
         else
-        {
             _failed++;
-        }
     }
 
-    public void ReportOperationComplete(OperationResult result)
-    {
-        Result = result;
-    }
+    public void ReportOperationComplete(OperationResult result) => Result = result;
 
-    public int StartConditionAttempts { get; set; } = 0;
+    public int StartConditionAttempts { get; set; }
 
-    public int Succeded => _succeded;
+    public int Succeeded => _succeeded;
 
     public int Failed => _failed;
 
@@ -81,14 +74,10 @@ public class OperationContext<TOperation> : IAsyncDisposable
         while (true)
         {
             if (timeout.HasValue && (DateTime.UtcNow - startTime).TotalMilliseconds > timeout)
-            {
                 throw new TimeoutException();
-            }
 
             if (condition(this))
-            {
                 break;
-            }
 
             await Task.Delay(50);
         }
@@ -128,7 +117,11 @@ public class OperationConfig
 
     public int ShouldFailTask { get; set; }
 
-    public bool ShoulFailOnStart { get; set; }
+    public bool ShouldFailOnStart { get; set; }
+
+    public bool ShouldThrowInGetTasks { get; set; }
+
+    public bool AllMustSucceed { get; set; }
 
     public int SimulateStartupAttempts { get; set; } = 1;
 

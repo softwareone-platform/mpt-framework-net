@@ -1,66 +1,61 @@
+using FluentAssertions;
 using Mpt.Framework.Operations.Models;
 using Mpt.Framework.Operations.Utility;
 
 namespace Mpt.Framework.Operations.Tests.Reflection;
 
+// OperationSagaTypeBuilder caches by operation Type, so each test below uses its own private
+// nested class. Sharing a type across tests would leak the first test's name into the others.
 public class SagaTypeBuilderTests
 {
     [Fact]
-    public void MakeSagaType_ShouldReturnSameType_ForSameOperation()
+    public void MakeSagaType_SameOperationCalledTwice_ReturnsCachedType()
     {
-        // Arrange
-        Type operationType = typeof(SampleOperation);
+        var first = OperationSagaTypeBuilder.MakeSagaType(typeof(OpForCacheTest), "abc");
+        var second = OperationSagaTypeBuilder.MakeSagaType(typeof(OpForCacheTest), "abc");
 
-        // Act
-        Type sagaType1 = OperationSagaTypeBuilder.MakeSagaType(operationType, "abc");
-        Type sagaType2 = OperationSagaTypeBuilder.MakeSagaType(operationType, "abc");
-
-        // Assert
-        Assert.Equal(sagaType1, sagaType2);
+        first.Should().BeSameAs(second);
     }
 
     [Fact]
-    public void MakeSagaType_ShouldCreateType_WithExpectedName()
+    public void MakeSagaType_DifferentOperations_ReturnDifferentTypes()
     {
-        // Arrange
-        Type operationType = typeof(SampleOperation);
-        string expectedTypeName = $"{operationType.Name}Saga";
+        var a = OperationSagaTypeBuilder.MakeSagaType(typeof(OpForDifferentTestA), "a");
+        var b = OperationSagaTypeBuilder.MakeSagaType(typeof(OpForDifferentTestB), "b");
 
-        // Act
-        Type sagaType = OperationSagaTypeBuilder.MakeSagaType(operationType, "abc");
-
-        // Assert
-        Assert.StartsWith(expectedTypeName, sagaType.Name);
+        a.Should().NotBeSameAs(b);
     }
 
     [Fact]
-    public void MakeSagaType_ShouldCreateType_ThatInheritsFromOperationSaga()
+    public void MakeSagaType_CreatedTypeHasNamePrefixedByOperationName()
     {
-        // Arrange
-        Type operationType = typeof(SampleOperation);
+        var sagaType = OperationSagaTypeBuilder.MakeSagaType(typeof(OpForNameTest), "any");
 
-        // Act
-        Type sagaType = OperationSagaTypeBuilder.MakeSagaType(operationType, "abc");
-
-        // Assert
-        Assert.True(typeof(OperationSaga).IsAssignableFrom(sagaType));
+        sagaType.Name.Should().StartWith($"{nameof(OpForNameTest)}Saga");
     }
 
     [Fact]
-    public void MakeSagaType_InstanceTypeProperty_ShouldHaveGivenValue()
+    public void MakeSagaType_CreatedTypeInheritsFromOperationSaga()
     {
-        // Arrange
-        Type operationType = typeof(SampleOperation);
+        var sagaType = OperationSagaTypeBuilder.MakeSagaType(typeof(OpForInheritsTest), "any");
 
-        // Act
-        Type sagaType = OperationSagaTypeBuilder.MakeSagaType(operationType, "abc");
-        var instance = Activator.CreateInstance(sagaType) as OperationSaga;
-
-        // Assert
-        Assert.Equal("abc", instance!.Type);
+        typeof(OperationSaga).IsAssignableFrom(sagaType).Should().BeTrue();
     }
 
-    private class SampleOperation
+    [Fact]
+    public void MakeSagaType_InstanceFromParameterlessCtor_HasTypeSetToDiscriminator()
     {
+        var sagaType = OperationSagaTypeBuilder.MakeSagaType(typeof(OpForTypePropTest), "abc");
+
+        var instance = (OperationSaga)Activator.CreateInstance(sagaType)!;
+
+        instance.Type.Should().Be("abc");
     }
+
+    private class OpForCacheTest { }
+    private class OpForDifferentTestA { }
+    private class OpForDifferentTestB { }
+    private class OpForNameTest { }
+    private class OpForInheritsTest { }
+    private class OpForTypePropTest { }
 }
