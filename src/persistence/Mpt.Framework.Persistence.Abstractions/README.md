@@ -14,7 +14,8 @@ Pure abstractions for the [Mpt.Framework.Persistence](https://www.nuget.org/pack
 | `IFilterProvider<TDbEntity>`                | Custom-filter extensibility point applied during `GetPageAsync`.                                       |
 | `IEntityConfiguration<TEntity>`             | Declarative policy surface — `ConfigureActions` / `ConfigureUpdate`.                                   |
 | `IEntityLifecycleHooks<TEntity>`            | `OnCreatingAsync` / `OnUpdatingAsync` / `OnDeletingAsync`.                                             |
-| `IEntityEventProducer<TEntity>`             | Returns `EventMessage` instances; the engine publishes via `IMessageHubPublisher`.                     |
+| `IEntityEventProducer<TEntity>`             | `ProduceCreatedEvents` / `ProduceUpdatedEvents` / `ProduceStatusChangedEvents` / `ProduceDeletedEvents` / `RegisterCustomEvent` + `ProduceCustomEvents` / `CustomizeEvents` / `Reset`. Registers `Generic*Event<TEntity>` (and `CustomEvent<TEntity>`) with `Mpt.Framework.MessageHub.IPlatformEventEmitter`; the unit of work flushes the emitter after every repository produces. |
+| `ISyncPlatformEventProducer<TEntity>`       | Forward-compat marker for a sync-stream pipeline; no concrete implementation ships.                    |
 | Policy DSL                                  | `IActionPolicy`, `IEventPolicy`, `IUpdatePolicy`, `IUpdatePolicyProperty`, `IUpdatePolicyRuleBuilder`. |
 | `EntityAction` / `EntityEventTypes` / `PolicyRuleAccess` / `PropertyHints` | Enums.                                                            |
 | `IRqlGraphHolder`                           | Marker that view-models carry an `IRqlNode` graph.                                                     |

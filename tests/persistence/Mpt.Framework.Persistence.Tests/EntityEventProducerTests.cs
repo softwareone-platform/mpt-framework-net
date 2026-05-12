@@ -1,8 +1,8 @@
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Mpt.Framework.MessageHub;
 using NSubstitute;
 
-namespace Mpt.Framework.MessageHub.Tests.Events;
+namespace Mpt.Framework.Persistence.Tests;
 
 public class EntityEventProducerTests
 {
@@ -24,7 +24,8 @@ public class EntityEventProducerTests
 
         await producer.ProduceCreatedEvents(entity, CancellationToken.None);
 
-        emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e => e.GetType() == typeof(GenericCreatedEvent<TestEntity>)));
+        emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e =>
+            e.GetType() == typeof(GenericCreatedEvent<TestEntity>)));
     }
 
     [Fact]
@@ -37,7 +38,8 @@ public class EntityEventProducerTests
         await producer.ProduceUpdatedEvents(entity, original, CancellationToken.None);
 
         emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e =>
-            e.GetType() == typeof(GenericUpdatedEvent<TestEntity>) && ((GenericUpdatedEvent<TestEntity>)e).Original == original));
+            e.GetType() == typeof(GenericUpdatedEvent<TestEntity>)
+            && ((GenericUpdatedEvent<TestEntity>)e).Original == original));
     }
 
     [Fact]
@@ -47,11 +49,12 @@ public class EntityEventProducerTests
         var entity = new TestEntity { Id = "acct-1", Status = "Active" };
 
         await producer.ProduceStatusChangedEvents(entity, null, e => e.Status ?? "(none)", CancellationToken.None);
-        emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e => e is GenericStatusChangedEvent<TestEntity>));
+        emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e =>
+            e.GetType() == typeof(GenericStatusChangedEvent<TestEntity>)));
 
-        // Updated events for the same entity must now be skipped (suppression set by status-changed).
         await producer.ProduceUpdatedEvents(entity, null, CancellationToken.None);
-        emitter.DidNotReceive().Register(Arg.Is<IPlatformEvent>(e => e is GenericUpdatedEvent<TestEntity>));
+        emitter.DidNotReceive().Register(Arg.Is<IPlatformEvent>(e =>
+            e.GetType() == typeof(GenericUpdatedEvent<TestEntity>)));
     }
 
     [Fact]
@@ -83,7 +86,8 @@ public class EntityEventProducerTests
 
         await producer.ProduceCustomEvents(entity, null, CancellationToken.None);
 
-        emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e => e is CustomEvent<TestEntity>));
+        emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e =>
+            e.GetType() == typeof(CustomEvent<TestEntity>)));
     }
 
     [Theory]
@@ -135,25 +139,49 @@ public class EntityEventProducerTests
 
         producer.Reset();
 
-        // Customization gone — Created event should now register normally.
         await producer.ProduceCreatedEvents(entity, CancellationToken.None);
-        emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e => e.GetType() == typeof(GenericCreatedEvent<TestEntity>)));
+        emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e =>
+            e.GetType() == typeof(GenericCreatedEvent<TestEntity>)));
 
-        // Registered custom event gone — ProduceCustomEvents should be a no-op.
         emitter.ClearReceivedCalls();
         await producer.ProduceCustomEvents(entity, null, CancellationToken.None);
         emitter.DidNotReceiveWithAnyArgs().Register((IPlatformEvent)default!);
     }
 
     [Fact]
-    public async Task ProducedEventsCarrySourceModuleFromMessageHubBuilder()
+    public async Task ProducedEventsCarrySourceModuleFromPersistenceBuilder()
     {
         var (producer, emitter) = BuildProducer(moduleCode: "billing");
         var entity = new TestEntity { Id = "acct-1" };
 
         await producer.ProduceCreatedEvents(entity, CancellationToken.None);
 
-        emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e => e.MakeMessage().Routing.SourceModule == "billing"));
+        emitter.Received(1).Register(Arg.Is<IPlatformEvent>(e =>
+            e.MakeMessage().Routing.SourceModule == "billing"));
+    }
+
+    [Fact]
+    public async Task ProducerIsNoOp_WhenIPlatformEventEmitterIsNotRegistered()
+    {
+        // Build a service collection WITHOUT registering IPlatformEventEmitter.
+        var services = new ServiceCollection();
+        var pBuilder = new PersistenceBuilder(services, "billing");
+        services.AddSingleton(pBuilder);
+        var sp = services.BuildServiceProvider();
+        var producer = new TestProducer(sp);
+
+        var entity = new TestEntity { Id = "acct-1" };
+
+        // None of these should throw; all should be silent no-ops.
+        var act = async () =>
+        {
+            await producer.ProduceCreatedEvents(entity, CancellationToken.None);
+            await producer.ProduceUpdatedEvents(entity, null, CancellationToken.None);
+            await producer.ProduceDeletedEvents(entity, CancellationToken.None);
+            await producer.ProduceCustomEvents(entity, null, CancellationToken.None);
+        };
+
+        await act.Should().NotThrowAsync();
     }
 
     private static (TestProducer Producer, IPlatformEventEmitter Emitter) BuildProducer(string moduleCode = "billing")
@@ -161,9 +189,16 @@ public class EntityEventProducerTests
         var services = new ServiceCollection();
         var emitter = Substitute.For<IPlatformEventEmitter>();
         services.AddSingleton(emitter);
-        services.AddSingleton(new MessageHubBuilder(services, moduleCode));
+        services.AddSingleton(new PersistenceBuilder(services, moduleCode));
         var sp = services.BuildServiceProvider();
         return (new TestProducer(sp), emitter);
+    }
+
+    public class TestEntity : IPlatformEntity
+    {
+        public string Id { get; set; } = "test-id";
+        public int Revision { get; set; }
+        public string? Status { get; set; }
     }
 
     private sealed class TestProducer(IServiceProvider sp) : EntityEventProducer<TestEntity>(sp)

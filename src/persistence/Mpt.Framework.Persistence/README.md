@@ -4,7 +4,7 @@ Query + Rules + Data orchestration for `Mpt.Framework.*`. Combines:
 
 - **Read surface** — an RQL-driven `IQueryService<TEntity>` with paging, custom filters, RQL-shaped projections.
 - **Write surface** — `IRepository<TEntity>` + `IUnitOfWork` that batch Add / Delete / GetForUpdate work and flush on `SaveChangesAsync`.
-- **Rules surface** — declarative `IEntityConfiguration<TEntity>` with role-aware action and property policies; per-entity lifecycle hooks; per-entity event producers wired through `IMessageHubPublisher`.
+- **Rules surface** — declarative `IEntityConfiguration<TEntity>` with role-aware action and property policies; per-entity lifecycle hooks; per-entity event producers (`Generic{Created,Updated,Deleted,StatusChanged}Event<TEntity>` + `CustomEvent<TEntity>`) flushed through `Mpt.Framework.MessageHub`'s `IPlatformEventEmitter`.
 
 The `Repository<TEntity>` abstract base is the glue: it walks Add/Update/Delete sets through the four-phase save flow (`OnSaveChangesInitiated` → `OnBeforeSaveChanges` → persistence write → `OnAfterSaveChanges`), invoking the configured lifecycle hooks before the write and emitting events through MessageHub after.
 
@@ -80,7 +80,46 @@ Three open-generic hooks are registered by default. Override any of them with a 
 
 - `EntityConfiguration<TEntity>` — declare action + update policies (see `Mpt.Framework.Persistence.Abstractions` README for the DSL surface).
 - `EntityLifecycleHooks<TEntity>` — `OnCreatingAsync` / `OnUpdatingAsync` / `OnDeletingAsync`. Use to enforce invariants or compute derived properties.
-- `EntityEventProducer<TEntity>` — return `EventMessage` instances; the engine publishes them via the registered `IMessageHubPublisher`.
+- `EntityEventProducer<TEntity>` — declare which lifecycle actions raise events and how. See below.
+
+## Event producers (`EntityEventProducer<TEntity>`)
+
+The repository's after-save phase asks the configured `IEntityEventProducer<TEntity>` to construct lifecycle events for each added / updated / deleted entity. The producer registers each `Generic*Event<TEntity>` with the shared `IPlatformEventEmitter` from `Mpt.Framework.MessageHub`, and the unit of work flushes the emitter once every repository has produced.
+
+```csharp
+public sealed class InvoiceEventProducer(IServiceProvider sp) : EntityEventProducer<Invoice>(sp)
+{
+    protected override void ConfigureEvents(IEventPolicy<Invoice> policy)
+    {
+        policy.Define(EntityAction.Create);
+        policy.Define(EntityAction.Update);
+        policy.Define(EntityAction.Delete);
+    }
+
+    protected override Task ConfigurePermissionsAsync(
+        PlatformEventPermissionsBuilder builder,
+        Invoice entity, Invoice? original, CancellationToken ct)
+    {
+        builder.AddAccountPrincipalAccess(entity.AccountId, accountType: "Tenant");
+        return Task.CompletedTask;
+    }
+}
+
+// composition root
+services.AddScoped<IEntityEventProducer<Invoice>, InvoiceEventProducer>();
+```
+
+The interface surface — `ProduceCreatedEvents`, `ProduceUpdatedEvents`, `ProduceStatusChangedEvents`, `ProduceDeletedEvents`, `RegisterCustomEvent` + `ProduceCustomEvents`, `CustomizeEvents`, `Reset` — builds the matching `Generic*Event<TEntity>` (or `CustomEvent<TEntity>` for ad-hoc events) and forwards to `IPlatformEventEmitter`. `ProduceStatusChangedEvents` additionally suppresses any subsequent Updated event for the same entity in the current scope — status change supersedes update.
+
+If you don't register a subclass, `AddPersistence(...)` already wires the open-generic default `EntityEventProducer<>` which is a no-op (no actions defined → `ShouldProduceOn` returns false → repository skips event production).
+
+### Without MessageHub
+
+If `AddMessageHub(...)` is not called, no `IPlatformEventEmitter` is registered. The producer becomes a silent no-op — `ProduceCreatedEvents` / `ProduceUpdatedEvents` / etc. return immediately without throwing. Persistence still functions normally; events simply don't flow to the wire.
+
+### Sync producer marker
+
+`ISyncPlatformEventProducer<TEntity>` is a forward-compat marker for consumers building a dedicated sync-stream pipeline. No concrete implementation ships in this package.
 
 ## License
 

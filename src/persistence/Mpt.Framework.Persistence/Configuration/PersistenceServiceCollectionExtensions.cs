@@ -29,6 +29,7 @@ public static class PersistenceServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, InMemoryUnitOfWork>();
 
         var builder = new PersistenceBuilder(services, moduleCode);
+        services.AddSingleton(builder);
         builder.AddDefaultEntityServices();
         configure(builder);
 

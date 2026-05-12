@@ -104,67 +104,9 @@ The built-in event classes live in `Mpt.Framework.MessageHub.Abstractions` so yo
 | `GenericUpdatedEvent<TEntity>`             | `updated`         | Optional `original` baseline appended as `OriginalEntity`. |
 | `GenericDeletedEvent<TEntity>`             | `deleted`         | Carries only `Id`; marks `EventHints.Incomplete` automatically. |
 | `GenericStatusChangedEvent<TEntity>`       | `status_changed`  | Same shape as Updated plus a `statusResolver` delegate; suppresses any subsequent Updated event for the same entity in the current scope. |
-| `CustomEvent<TEntity>`                     | descriptor-driven | Used by `IEntityEventProducer<T>.ProduceCustomEvents`; configure key / summary / description via `Customize(...)`. |
+| `CustomEvent<TEntity>`                     | descriptor-driven | Produced by `Mpt.Framework.Persistence.IEntityEventProducer<TEntity>.ProduceCustomEvents`; configure key / summary / description via `Customize(...)`. |
 
-### `EntityEventProducer<TEntity>` — declarative producer
-
-For consumers who want the upstream-style per-entity producer shape, derive from `EntityEventProducer<TEntity>` and declare which actions you participate in:
-
-```csharp
-public sealed class AccountEventProducer(IServiceProvider sp) : EntityEventProducer<Account>(sp)
-{
-    protected override void ConfigureEvents(IEventPolicy<Account> context)
-    {
-        context.Define(EntityAction.Create);
-        context.Define(EntityAction.Update);
-        context.Define(EntityAction.Delete);
-    }
-
-    protected override Task ConfigurePermissionsAsync(
-        PlatformEventPermissionsBuilder builder, Account entity, Account? original, CancellationToken ct)
-    {
-        builder.AddAccountPrincipalAccess(entity.Id, accountType: "Tenant");
-        return Task.CompletedTask;
-    }
-}
-
-// composition root
-services.AddScoped<IEntityEventProducer<Account>, AccountEventProducer>();
-```
-
-The producer surface (`ProduceCreatedEvents`, `ProduceUpdatedEvents`, `ProduceStatusChangedEvents`, `ProduceDeletedEvents`, `RegisterCustomEvent` + `ProduceCustomEvents`, `CustomizeEvents`, `Reset`) builds the appropriate `Generic*Event<TEntity>` (or `CustomEvent<TEntity>` for ad-hoc events) and forwards it to the shared `IPlatformEventEmitter`.
-
-### Naming clash with `Mpt.Framework.Persistence.IEntityEventProducer<TEntity>`
-
-`Mpt.Framework.Persistence` defines its own `IEntityEventProducer<TEntity>` with a single `ProduceAsync` method that yields `EventMessage` instances directly — that interface is what the Persistence `Repository<T>` calls in its after-save phase. The MessageHub-side producer documented above lives at a different abstraction layer (it constructs `Generic*Event` instances and registers them with `IPlatformEventEmitter`). If you reference both namespaces in the same file, fully-qualify the type name; otherwise C# will report CS0104.
-
-### Bridging to `Mpt.Framework.Persistence`
-
-To emit `GenericCreatedEvent<TEntity>` etc. from inside a Persistence `Repository<T>` save flow, subclass the Persistence producer and call `MakeMessage()`:
-
-```csharp
-public sealed class AccountPersistenceEventProducer(MessageHubBuilder hub)
-    : Mpt.Framework.Persistence.EntityEventProducer<Account>
-{
-    public override async IAsyncEnumerable<EventMessage> ProduceAsync(
-        Mpt.Framework.Persistence.EntityAction action, Account current, Account? original,
-        [EnumeratorCancellation] CancellationToken ct)
-    {
-        PlatformEvent @event = action switch
-        {
-            Mpt.Framework.Persistence.EntityAction.Create => new GenericCreatedEvent<Account>(hub.ModuleCode, current, new()),
-            Mpt.Framework.Persistence.EntityAction.Update => new GenericUpdatedEvent<Account>(hub.ModuleCode, current, original, new()),
-            Mpt.Framework.Persistence.EntityAction.Delete => new GenericDeletedEvent<Account>(hub.ModuleCode, current, new()),
-            _ => throw new ArgumentOutOfRangeException(nameof(action))
-        };
-
-        yield return @event.MakeMessage();
-        await Task.CompletedTask;
-    }
-}
-```
-
-`moduleCode` should match the value you passed to `AddMessageHub(...)` — `MessageHubBuilder.ModuleCode` is the canonical source.
+The declarative per-entity producer that consumes this layer (`EntityEventProducer<TEntity>` with `ConfigureEvents` / `ProduceCreatedEvents` / `RegisterCustomEvent` / `CustomizeEvents` / etc.) lives in `Mpt.Framework.Persistence` — see that package's README for the subclass pattern. The Persistence `Repository<T>` calls the producer automatically in its after-save phase; the unit of work then flushes the events through `IPlatformEventEmitter` here.
 
 ### Actor stamping
 

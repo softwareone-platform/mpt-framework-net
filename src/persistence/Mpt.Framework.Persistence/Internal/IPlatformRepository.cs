@@ -1,5 +1,3 @@
-using Mpt.Framework.MessageHub;
-
 namespace Mpt.Framework.Persistence.Internal;
 
 /// <summary>
@@ -17,5 +15,11 @@ internal interface IPlatformRepository : IRepository
 
     Task OnBeforeSaveChangesAsync(DateTime timestamp, CancellationToken cancellationToken);
 
-    Task OnAfterSaveChangesAsync(IMessageHubPublisher? publisher, CancellationToken cancellationToken);
+    /// <summary>
+    /// Called after the persistence flush has committed. Repositories invoke their
+    /// <see cref="IEntityEventProducer{TEntity}"/> here to register events with the
+    /// shared <see cref="MessageHub.IPlatformEventEmitter"/>; the unit of work flushes
+    /// the emitter once every repository has produced.
+    /// </summary>
+    Task OnAfterSaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -1,9 +1,11 @@
-namespace Mpt.Framework.MessageHub;
+using Mpt.Framework.MessageHub;
+
+namespace Mpt.Framework.Persistence;
 
 /// <summary>
 /// Forward-compatibility marker for a sync-stream event producer. No concrete
-/// implementation ships in this package; consumers wire their own when they need a
-/// dedicated sync pipeline distinct from the regular event stream.
+/// implementation ships in this package; intended for consumers who roll their own
+/// sync pipeline distinct from the regular event stream.
 /// </summary>
 public interface ISyncPlatformEventProducer
 {

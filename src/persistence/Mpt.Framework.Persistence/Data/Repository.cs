@@ -220,11 +220,11 @@ public abstract class Repository<TEntity>(
         }
     }
 
-    async Task IPlatformRepository.OnAfterSaveChangesAsync(IMessageHubPublisher? publisher, CancellationToken cancellationToken)
+    async Task IPlatformRepository.OnAfterSaveChangesAsync(CancellationToken cancellationToken)
     {
-        await ProduceEventsAsync(_creating, EntityAction.Create, includeOriginals: false, publisher, cancellationToken);
-        await ProduceEventsAsync(_updating, EntityAction.Update, includeOriginals: true, publisher, cancellationToken);
-        await ProduceEventsAsync(_deleting, EntityAction.Delete, includeOriginals: false, publisher, cancellationToken);
+        await ProduceCreatedAsync(_creating, cancellationToken);
+        await ProduceUpdatedAsync(_updating, cancellationToken);
+        await ProduceDeletedAsync(_deleting, cancellationToken);
 
         _creating = null;
         _updating = null;
@@ -232,32 +232,40 @@ public abstract class Repository<TEntity>(
         _deleting = null;
     }
 
-    private async Task ProduceEventsAsync(
-        HashSet<TEntity>? items,
-        EntityAction action,
-        bool includeOriginals,
-        IMessageHubPublisher? publisher,
-        CancellationToken cancellationToken)
+    private async Task ProduceCreatedAsync(HashSet<TEntity>? items, CancellationToken cancellationToken)
     {
-        if (items == null || items.Count == 0)
-            return;
-
-        if (!eventProducer.ShouldProduceOn(action))
-            return;
+        if (items == null || items.Count == 0) return;
+        if (!eventProducer.ShouldProduceOn(EntityAction.Create)) return;
 
         foreach (var item in items)
         {
-            var original = includeOriginals && _updatingOriginals != null
-                ? _updatingOriginals.GetValueOrDefault(item)
-                : null;
+            await eventProducer.ProduceCreatedEvents(item, cancellationToken);
+            await eventProducer.ProduceCustomEvents(item, null, cancellationToken);
+        }
+    }
 
-            await foreach (var message in eventProducer.ProduceAsync(action, item, original, cancellationToken))
-            {
-                if (publisher != null)
-                {
-                    await publisher.PublishAsync(message, cancellationToken);
-                }
-            }
+    private async Task ProduceUpdatedAsync(HashSet<TEntity>? items, CancellationToken cancellationToken)
+    {
+        if (items == null || items.Count == 0) return;
+        if (!eventProducer.ShouldProduceOn(EntityAction.Update)) return;
+
+        foreach (var item in items)
+        {
+            var original = _updatingOriginals?.GetValueOrDefault(item);
+            await eventProducer.ProduceUpdatedEvents(item, original, cancellationToken);
+            await eventProducer.ProduceCustomEvents(item, original, cancellationToken);
+        }
+    }
+
+    private async Task ProduceDeletedAsync(HashSet<TEntity>? items, CancellationToken cancellationToken)
+    {
+        if (items == null || items.Count == 0) return;
+        if (!eventProducer.ShouldProduceOn(EntityAction.Delete)) return;
+
+        foreach (var item in items)
+        {
+            await eventProducer.ProduceDeletedEvents(item, cancellationToken);
+            await eventProducer.ProduceCustomEvents(item, null, cancellationToken);
         }
     }
 

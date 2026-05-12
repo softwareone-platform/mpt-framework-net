@@ -47,9 +47,14 @@ public abstract class UnitOfWork(IServiceProvider serviceProvider, ILogger<UnitO
         foreach (var repository in repositories)
             await repository.SaveChangesAsync(cancellationToken);
 
-        var publisher = serviceProvider.GetService<IMessageHubPublisher>();
         foreach (var repository in repositories)
-            await repository.OnAfterSaveChangesAsync(publisher, cancellationToken);
+            await repository.OnAfterSaveChangesAsync(cancellationToken);
+
+        // Flush every event producers have queued through the shared emitter (optional —
+        // when MessageHub isn't registered, neither the emitter nor the producer fire).
+        var emitter = serviceProvider.GetService<IPlatformEventEmitter>();
+        if (emitter is not null)
+            await emitter.EmitAsync(cancellationToken);
 
         if (afterSaveActivity == null)
             return;

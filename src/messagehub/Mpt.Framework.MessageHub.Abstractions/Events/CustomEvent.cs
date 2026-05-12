@@ -1,17 +1,16 @@
 namespace Mpt.Framework.MessageHub;
 
 /// <summary>
-/// Vehicle for events that do not fit the standard CRUD categories. Produced by
-/// <see cref="IEntityEventProducer{TEntity}.ProduceCustomEvents"/> after a caller has
-/// registered the event's descriptor via
-/// <see cref="IEntityEventProducer{TEntity}.RegisterCustomEvent"/>. The descriptor must
-/// supply <see cref="IEventDescriptor.EventKey"/>, <see cref="IEventDescriptor.Summary"/>,
-/// and <see cref="IEventDescriptor.Description"/>; otherwise the producer throws.
+/// Vehicle for events that do not fit the standard CRUD categories. Produced by the
+/// Persistence-side <c>IEntityEventProducer&lt;TEntity&gt;.ProduceCustomEvents</c> after
+/// a caller has registered the event's descriptor via
+/// <c>RegisterCustomEvent</c>. The descriptor must supply
+/// <see cref="IEventDescriptor.EventKey"/>, <see cref="IEventDescriptor.Summary"/>, and
+/// <see cref="IEventDescriptor.Description"/>; otherwise the producer throws.
 /// </summary>
 /// <remarks>
-/// Public (rather than internal as upstream) so the engine-package
-/// <c>EntityEventProducer&lt;TEntity&gt;</c> can construct instances from a different
-/// assembly.
+/// Public (rather than internal as upstream) so the Persistence engine package can
+/// construct instances from a different assembly.
 /// </remarks>
 public class CustomEvent<TEntity> : GenericEvent<TEntity>
     where TEntity : class, IPlatformEntity, new()
