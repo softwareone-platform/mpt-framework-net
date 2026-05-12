@@ -5,12 +5,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Mpt.Framework.MessageHub.Tests.Events;
 
-/// <summary>
-/// End-to-end check: register a <see cref="GenericCreatedEvent{TEntity}"/> with the
-/// scoped <see cref="IPlatformEventEmitter"/>, call <see cref="IPlatformEventEmitter.EmitAsync"/>,
-/// and verify the corresponding <see cref="EventMessage"/> arrives at a MassTransit consumer
-/// over the in-memory transport.
-/// </summary>
 public class InMemoryEventRoundTripTests
 {
     private const string ProducerModule = "producer-module";

@@ -30,8 +30,6 @@ public static class MessageHubConfigurationExtensions
         services.AddSingleton(builder);
         services.AddSingleton<IMessageHubPublisher, MessageHubPublisher>();
 
-        // Event-emission layer — harmless when unused; always available so consumers can
-        // inject IPlatformEventEmitter without an opt-in extension call.
         services.AddScoped<IPlatformEventEmitter, PlatformEventEmitter>();
         services.AddScoped<IPlatformMessageReplayService, PlatformMessageReplayService>();
 

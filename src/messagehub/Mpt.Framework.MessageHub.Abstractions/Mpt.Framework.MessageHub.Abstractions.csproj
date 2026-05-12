@@ -39,7 +39,6 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Mpt.Framework.MessageHub" />
     <InternalsVisibleTo Include="Mpt.Framework.MessageHub.Tests" />
-    <!-- Persistence's EntityEventProducer<T> constructs EventDescriptor (internal here) -->
     <InternalsVisibleTo Include="Mpt.Framework.Persistence" />
     <InternalsVisibleTo Include="Mpt.Framework.Persistence.Tests" />
   </ItemGroup>

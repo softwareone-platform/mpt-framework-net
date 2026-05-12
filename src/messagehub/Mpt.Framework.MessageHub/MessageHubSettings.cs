@@ -16,13 +16,6 @@ public class MessageHubSettings
     /// </summary>
     public string OutputStream { get; set; } = "marketplace.platform.messages";
 
-    /// <summary>
-    /// How the <see cref="IPlatformEventEmitter"/> hands <see cref="EventMessage"/> instances
-    /// to the leaf <see cref="IMessageHubPublisher"/>. Default <see cref="MessageHubPublishMode.Immediate"/>
-    /// — caller awaits each send inline. Switch to <see cref="MessageHubPublishMode.Background"/>
-    /// to queue messages into an in-process channel drained by a hosted service (preserves
-    /// request throughput at the cost of a slightly delayed publish).
-    /// </summary>
     public MessageHubPublishMode PublishMode { get; set; } = MessageHubPublishMode.Immediate;
 }
 
@@ -41,10 +34,7 @@ public enum MessageHubTransport
 
 public enum MessageHubPublishMode
 {
-    /// <summary>Publish events synchronously — the caller awaits the MassTransit send.</summary>
     Immediate,
-
-    /// <summary>Buffer events to an in-process channel drained by a background hosted service.</summary>
     Background,
 }
 

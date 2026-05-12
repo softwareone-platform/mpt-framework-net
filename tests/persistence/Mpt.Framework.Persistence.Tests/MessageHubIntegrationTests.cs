@@ -34,7 +34,6 @@ public class MessageHubIntegrationTests
     [Fact]
     public async Task AfterSaveChanges_without_emitter_still_completes_cleanly()
     {
-        // No IPlatformEventEmitter registered — simulates the "MessageHub not wired" case.
         using var services = PersistenceFixture.Build(configureServices: s =>
             s.AddScoped<IEntityEventProducer<WidgetView>, CreatedOnlyProducer>());
         using var scope = services.CreateScope();
@@ -55,7 +54,6 @@ public class MessageHubIntegrationTests
         using var services = PersistenceFixture.Build(configureServices: s =>
         {
             s.AddSingleton(emitter);
-            // Producer that does NOT call Define(Create) → ShouldProduceOn(Create) is false.
             s.AddScoped<IEntityEventProducer<WidgetView>, OptOutProducer>();
         });
         using var scope = services.CreateScope();
@@ -75,8 +73,5 @@ public class MessageHubIntegrationTests
             => policy.Define(EntityAction.Create);
     }
 
-    private sealed class OptOutProducer(IServiceProvider sp) : EntityEventProducer<WidgetView>(sp)
-    {
-        // ConfigureEvents not overridden → no actions defined → ShouldProduceOn always false.
-    }
+    private sealed class OptOutProducer(IServiceProvider sp) : EntityEventProducer<WidgetView>(sp);
 }

@@ -5,12 +5,9 @@ using Mpt.Framework.Persistence.Internal;
 namespace Mpt.Framework.Persistence;
 
 /// <summary>
-/// Base implementation of <see cref="IEntityEventProducer{TEntity}"/>. Subclasses
-/// override <see cref="ConfigureEvents"/> to declare which actions they participate
-/// in, optionally override <see cref="ConfigurePermissionsAsync"/> to attach
-/// principal access to produced events, and optionally override
-/// <see cref="OnEventProduced"/> to attach additional objects or customisations
-/// before the emitter sees the event.
+/// Base implementation of <see cref="IEntityEventProducer{TEntity}"/>. Subclasses override
+/// <see cref="ConfigureEvents"/> to declare which actions they participate in. When no
+/// <see cref="IPlatformEventEmitter"/> is registered the producer is a silent no-op.
 /// </summary>
 public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
     where TEntity : class, IPlatformEntity, new()
@@ -21,19 +18,12 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
     private readonly Dictionary<(string EntityId, EntityEventTypes Type), EventDescriptor> _customizations = [];
     private readonly List<(TEntity Entity, Action<IEventDescriptor> Configure)> _registeredCustomEvents = [];
 
-    /// <summary>
-    /// Constructs the producer. Resolves the module code from <see cref="PersistenceBuilder"/>
-    /// and the shared <see cref="IPlatformEventEmitter"/> from DI. The emitter is treated
-    /// as optional — if MessageHub isn't registered (no emitter available), the producer
-    /// becomes a silent no-op and no events flow to the wire.
-    /// </summary>
     public EntityEventProducer(IServiceProvider serviceProvider)
     {
         _moduleCode = serviceProvider.GetRequiredService<PersistenceBuilder>().ModuleCode;
         _eventEmitter = serviceProvider.GetService<IPlatformEventEmitter>();
     }
 
-    /// <inheritdoc />
     public bool ShouldProduceOn(EntityAction action)
     {
         if (_eventPolicy == null)
@@ -45,23 +35,18 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         return _eventPolicy.IsDefined(action);
     }
 
-    /// <summary>Convenience overload — class-level forwarder for the default-interface method.</summary>
     public Task ProduceCreatedEvents(TEntity entity, CancellationToken cancellationToken)
         => ProduceCreatedEvents(entity, _ => { }, cancellationToken);
 
-    /// <summary>Convenience overload — class-level forwarder for the default-interface method.</summary>
     public Task ProduceUpdatedEvents(TEntity entity, TEntity? original, CancellationToken cancellationToken)
         => ProduceUpdatedEvents(entity, original, _ => { }, cancellationToken);
 
-    /// <summary>Convenience overload — class-level forwarder for the default-interface method.</summary>
     public Task ProduceStatusChangedEvents(TEntity entity, TEntity? original, Func<TEntity, string> statusResolver, CancellationToken cancellationToken)
         => ProduceStatusChangedEvents(entity, original, statusResolver, _ => { }, cancellationToken);
 
-    /// <summary>Convenience overload — class-level forwarder for the default-interface method.</summary>
     public Task ProduceDeletedEvents(TEntity entity, CancellationToken cancellationToken)
         => ProduceDeletedEvents(entity, _ => { }, cancellationToken);
 
-    /// <inheritdoc />
     public async Task ProduceCreatedEvents(TEntity entity, Action<PlatformEvent> configure, CancellationToken cancellationToken)
     {
         if (_eventEmitter is null) return;
@@ -78,7 +63,6 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         _eventEmitter.Register(@event);
     }
 
-    /// <inheritdoc />
     public async Task ProduceUpdatedEvents(TEntity entity, TEntity? original, Action<PlatformEvent> configure, CancellationToken cancellationToken)
     {
         if (_eventEmitter is null) return;
@@ -95,7 +79,6 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         _eventEmitter.Register(@event);
     }
 
-    /// <inheritdoc />
     public async Task ProduceStatusChangedEvents(TEntity entity, TEntity? original, Func<TEntity, string> statusResolver, Action<PlatformEvent> configure, CancellationToken cancellationToken)
     {
         if (_eventEmitter is null) return;
@@ -115,7 +98,6 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         CustomizeEvents(entity, EntityEventTypes.Updated, t => t.IsSuppressed = true);
     }
 
-    /// <inheritdoc />
     public async Task ProduceDeletedEvents(TEntity entity, Action<PlatformEvent> configure, CancellationToken cancellationToken)
     {
         if (_eventEmitter is null) return;
@@ -133,13 +115,11 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         _eventEmitter.Register(@event);
     }
 
-    /// <inheritdoc />
     public void RegisterCustomEvent(TEntity entity, Action<IEventDescriptor> configure)
     {
         _registeredCustomEvents.Add((entity, configure));
     }
 
-    /// <inheritdoc />
     public async Task ProduceCustomEvents(TEntity entity, TEntity? original, CancellationToken cancellationToken)
     {
         if (_eventEmitter is null)
@@ -175,14 +155,12 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         _registeredCustomEvents.Clear();
     }
 
-    /// <inheritdoc />
     public void Reset()
     {
         _customizations.Clear();
         _registeredCustomEvents.Clear();
     }
 
-    /// <inheritdoc />
     public void CustomizeEvents(TEntity entity, EntityEventTypes types, Action<IEventDescriptor> configure)
     {
         foreach (var type in SplitEventTypes(types))
@@ -197,16 +175,12 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         }
     }
 
-    /// <summary>The module code stamped onto every emitted event's <see cref="EventMessageRouting.SourceModule"/>.</summary>
     protected string ModuleName => _moduleCode;
 
-    /// <summary>Subclasses call <see cref="IEventPolicy{TEntity}.Define"/> here for each action they react to.</summary>
     protected virtual void ConfigureEvents(IEventPolicy<TEntity> context) { }
 
-    /// <summary>Subclasses can populate <paramref name="builder"/> with per-event principal access.</summary>
     protected virtual Task ConfigurePermissionsAsync(PlatformEventPermissionsBuilder builder, TEntity entity, TEntity? original, CancellationToken cancellationToken) => Task.CompletedTask;
 
-    /// <summary>Hook for subclasses to attach extras (additional objects, customisation) just before the event is registered with the emitter.</summary>
     protected virtual void OnEventProduced(PlatformEvent platformEvent, TEntity entity, TEntity? original) { }
 
     private async Task<PlatformEventPermissionsBuilder> GetPermissionBuilder(TEntity entity, TEntity? original, CancellationToken cancellationToken)

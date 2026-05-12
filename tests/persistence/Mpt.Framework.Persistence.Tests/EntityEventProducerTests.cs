@@ -163,7 +163,6 @@ public class EntityEventProducerTests
     [Fact]
     public async Task ProducerIsNoOp_WhenIPlatformEventEmitterIsNotRegistered()
     {
-        // Build a service collection WITHOUT registering IPlatformEventEmitter.
         var services = new ServiceCollection();
         var pBuilder = new PersistenceBuilder(services, "billing");
         services.AddSingleton(pBuilder);
@@ -172,7 +171,6 @@ public class EntityEventProducerTests
 
         var entity = new TestEntity { Id = "acct-1" };
 
-        // None of these should throw; all should be silent no-ops.
         var act = async () =>
         {
             await producer.ProduceCreatedEvents(entity, CancellationToken.None);
