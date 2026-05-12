@@ -1,9 +1,12 @@
 using MassTransit;
-using Microsoft.Extensions.DependencyInjection;
+using Mpt.Framework.MessageHub;
 using Mpt.Framework.MessageHub.Internal;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Channels;
 
-namespace Mpt.Framework.MessageHub;
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Extensions.DependencyInjection;
 
 [ExcludeFromCodeCoverage(Justification = "Composition root")]
 public static class MessageHubConfigurationExtensions
@@ -26,6 +29,24 @@ public static class MessageHubConfigurationExtensions
         services.AddSingleton(settings);
         services.AddSingleton(builder);
         services.AddSingleton<IMessageHubPublisher, MessageHubPublisher>();
+
+        services.AddScoped<IPlatformEventEmitter, PlatformEventEmitter>();
+        services.AddScoped<IPlatformMessageReplayService, PlatformMessageReplayService>();
+
+        switch (settings.PublishMode)
+        {
+            case MessageHubPublishMode.Immediate:
+                services.AddSingleton<IPlatformMessagePublisher, ImmediatePlatformMessagePublisher>();
+                break;
+            case MessageHubPublishMode.Background:
+                services.AddSingleton(_ => Channel.CreateUnbounded<TracedTransport<EventMessage>>());
+                services.AddSingleton<IPlatformEventChannelService, PlatformEventChannelService>();
+                services.AddSingleton<IPlatformMessagePublisher, BackgroundPlatformMessagePublisher>();
+                services.AddHostedService<PlatformEventBackgroundService>();
+                break;
+            default:
+                throw new InvalidOperationException($"Unsupported publish mode {settings.PublishMode}");
+        }
 
         var streamBuilder = new InputStreamBuilder(builder.ModuleCode, builder, [.. builder.StreamProviders]);
 

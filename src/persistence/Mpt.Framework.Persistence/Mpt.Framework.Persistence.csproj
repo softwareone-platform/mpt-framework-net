@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Mpt.Framework.Persistence</RootNamespace>
+    <AssemblyName>Mpt.Framework.Persistence</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mpt.Framework.Persistence</PackageId>
+    <Title>Mpt.Framework.Persistence</Title>
+    <Description>Combined query + rules + repository engine for Mpt.Framework. The Repository&lt;TEntity&gt; abstract base ties RQL-driven reads, policy-enforced writes, and lifecycle hooks into a single unit-of-work; after-save events flow through Mpt.Framework.MessageHub. Reference Mpt.Framework.Persistence.Abstractions from your Application layer. For SQL Server (Entity Framework Core) persistence use Mpt.Framework.Persistence.EFCore.</Description>
+    <Authors>SoftwareOne and the Mpt.Framework contributors</Authors>
+    <Company>SoftwareOne</Company>
+    <Copyright>Copyright 2026 SoftwareOne and the Mpt.Framework contributors</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>persistence;repository;unitofwork;query;rules;rql</PackageTags>
+    <PackageProjectUrl>https://github.com/SoftwareONE/mpt-framework-net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoftwareONE/mpt-framework-net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" Condition="Exists('README.md')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="[11.10.0,13.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[10.0.0,11.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="[10.0.0,11.0.0)" />
+    <PackageReference Include="Mpt.Rql" Version="[1.13.0,2.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mpt.Framework.Persistence.Abstractions\Mpt.Framework.Persistence.Abstractions.csproj" />
+    <ProjectReference Include="..\..\mapping\Mpt.Framework.Mapping\Mpt.Framework.Mapping.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mpt.Framework.Persistence.EFCore" />
+    <InternalsVisibleTo Include="Mpt.Framework.Persistence.Tests" />
+  </ItemGroup>
+
+</Project>

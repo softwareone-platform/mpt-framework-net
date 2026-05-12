@@ -40,6 +40,7 @@ The first argument is your **module code** — used to build subscription names 
 | `OutputStream`       | `marketplace.platform.messages`        | Topic / queue name for outbound traffic.               |
 | `CleanupMode`        | `None`                                 | `DeleteEmptyUnknown` / `DeleteAnyUnknown` — sweeps stale subscriptions on startup. |
 | `OnMessagePublishing`| `null`                                 | Optional hook invoked just before every publish.        |
+| `PublishMode`        | `Immediate`                            | `Immediate` awaits each send inline; `Background` queues to an in-process channel drained by a hosted service. |
 
 ## Publishing
 
@@ -71,6 +72,59 @@ A stream's `InputStreamFilter` declares which `Modules` / `Entities` / `Events` 
 - Includes events whose `TargetModules` is empty (broadcast) **or** contains this module's name.
 - Limits to streams whose `Sources` flag matches the message's `Routing.Stream`.
 - Excludes events the module itself emitted, unless `AllowOwnEvents = true`.
+
+## Event authoring (`Generic*Event<TEntity>` + `IPlatformEventEmitter`)
+
+`AddMessageHub(...)` also wires an event-authoring layer for callers who want to compose lifecycle events without hand-building `EventMessage` instances. Inject `IPlatformEventEmitter` from your application code, register events during the unit of work, and flush them once at the end.
+
+```csharp
+public sealed class AccountService(IPlatformEventEmitter emitter, MessageHubBuilder hub)
+{
+    public async Task UpdateAsync(Account current, Account original, CancellationToken ct)
+    {
+        // ... persist the entity ...
+
+        emitter.Register(new GenericUpdatedEvent<Account>(
+            module: hub.ModuleCode,
+            data: current,
+            original: original,
+            permissionsBuilder: new PlatformEventPermissionsBuilder()
+                .AddAccountPrincipalAccess(current.Id, accountType: "Tenant")));
+
+        await emitter.EmitAsync(ct);
+    }
+}
+```
+
+The built-in event classes live in `Mpt.Framework.MessageHub.Abstractions` so your application layer doesn't have to reference the engine package:
+
+| Class                                      | `EventKey`        | Notes                                                 |
+| ------------------------------------------ | ----------------- | ----------------------------------------------------- |
+| `GenericCreatedEvent<TEntity>`             | `created`         | Carries the new entity as the main object.            |
+| `GenericUpdatedEvent<TEntity>`             | `updated`         | Optional `original` baseline appended as `OriginalEntity`. |
+| `GenericDeletedEvent<TEntity>`             | `deleted`         | Carries only `Id`; marks `EventHints.Incomplete` automatically. |
+| `GenericStatusChangedEvent<TEntity>`       | `status_changed`  | Same shape as Updated plus a `statusResolver` delegate; suppresses any subsequent Updated event for the same entity in the current scope. |
+| `CustomEvent<TEntity>`                     | descriptor-driven | Produced by `Mpt.Framework.Persistence.IEntityEventProducer<TEntity>.ProduceCustomEvents`; configure key / summary / description via `Customize(...)`. |
+
+The declarative per-entity producer that consumes this layer (`EntityEventProducer<TEntity>` with `ConfigureEvents` / `ProduceCreatedEvents` / `RegisterCustomEvent` / `CustomizeEvents` / etc.) lives in `Mpt.Framework.Persistence` — see that package's README for the subclass pattern. The Persistence `Repository<T>` calls the producer automatically in its after-save phase; the unit of work then flushes the events through `IPlatformEventEmitter` here.
+
+### Actor stamping
+
+Register an `IPlatformEventActorProducer` to stamp the current principal onto every outgoing event:
+
+```csharp
+services.AddScoped<IPlatformEventActorProducer, MyActorProducer>();
+```
+
+Without a registration, the emitter does not add an `ActorInfo` object; events still publish.
+
+### `IPlatformMessageReplayService`
+
+Resolved as a scoped service. Call `ReplayAsync(message, module, ct)` to re-drive an `EventMessage` with the default `RetryPolicy` (3 attempts, linear delay). Customise the policy via the overloads. The service increments the message's `Replays` counter and aborts once it reaches `MaxAttempts`.
+
+### `ISyncPlatformEventProducer<TEntity>`
+
+Forward-compat marker interface. No concrete implementation ships in this package; intended for consumers who roll their own sync-stream pipeline.
 
 ## License
 

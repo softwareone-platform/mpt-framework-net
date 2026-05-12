@@ -1,0 +1,30 @@
+namespace Mpt.Framework.Persistence;
+
+/// <summary>
+/// Non-generic marker for entity-configuration implementations — exists so DI can
+/// locate them by interface during assembly scanning.
+/// </summary>
+public interface IEntityConfiguration;
+
+/// <summary>
+/// Per-entity declarative configuration: defines which actions are permitted for
+/// which roles (<see cref="IActionPolicy{TEntity}"/>) and which property-level update
+/// rules apply (<see cref="IUpdatePolicy{TEntity}"/>).
+/// </summary>
+/// <typeparam name="TEntity">The entity being configured.</typeparam>
+public interface IEntityConfiguration<in TEntity> : IEntityConfiguration
+{
+    /// <summary>Returns true if the action is permitted for any of <paramref name="roles"/>.</summary>
+    bool IsActionAllowed(EntityAction action, IReadOnlyCollection<string> roles)
+        => IsActionAllowed(action.ToString(), roles);
+
+    /// <summary>Returns true if the named action is permitted for any of <paramref name="roles"/>.</summary>
+    bool IsActionAllowed(string action, IReadOnlyCollection<string> roles);
+
+    /// <summary>Returns the runtime update-policy context for the supplied action / roles.</summary>
+    IUpdatePolicyContext GetUpdatePolicy(EntityAction action, IReadOnlyCollection<string> roles)
+        => GetUpdatePolicy(action.ToString(), roles);
+
+    /// <summary>Returns the runtime update-policy context for the named action / roles.</summary>
+    IUpdatePolicyContext GetUpdatePolicy(string action, IReadOnlyCollection<string> roles);
+}

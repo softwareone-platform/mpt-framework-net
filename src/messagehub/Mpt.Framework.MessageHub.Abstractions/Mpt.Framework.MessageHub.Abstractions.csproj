@@ -32,4 +32,15 @@
     <None Include="README.md" Pack="true" PackagePath="" Condition="Exists('README.md')" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\abstractions\Mpt.Framework.Abstractions\Mpt.Framework.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mpt.Framework.MessageHub" />
+    <InternalsVisibleTo Include="Mpt.Framework.MessageHub.Tests" />
+    <InternalsVisibleTo Include="Mpt.Framework.Persistence" />
+    <InternalsVisibleTo Include="Mpt.Framework.Persistence.Tests" />
+  </ItemGroup>
+
 </Project>

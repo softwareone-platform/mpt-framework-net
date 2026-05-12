@@ -15,6 +15,8 @@ public class MessageHubSettings
     /// subscriptions on it. Default: <c>marketplace.platform.messages</c>.
     /// </summary>
     public string OutputStream { get; set; } = "marketplace.platform.messages";
+
+    public MessageHubPublishMode PublishMode { get; set; } = MessageHubPublishMode.Immediate;
 }
 
 public enum MessageHubCleanupMode
@@ -28,6 +30,12 @@ public enum MessageHubTransport
 {
     InMemory,
     ServiceBus
+}
+
+public enum MessageHubPublishMode
+{
+    Immediate,
+    Background,
 }
 
 public class MessageHubBuilder

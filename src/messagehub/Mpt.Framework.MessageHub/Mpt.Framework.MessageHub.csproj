@@ -45,6 +45,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Mpt.Framework.MessageHub.Tests" />
+    <!-- Castle DynamicProxy (used by NSubstitute) needs visibility to proxy internal interfaces in tests. -->
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 
 </Project>
