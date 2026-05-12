@@ -2,6 +2,7 @@ using MassTransit;
 using Mpt.Framework.MessageHub;
 using Mpt.Framework.MessageHub.Internal;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Channels;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 // ReSharper disable once CheckNamespace
@@ -28,6 +29,26 @@ public static class MessageHubConfigurationExtensions
         services.AddSingleton(settings);
         services.AddSingleton(builder);
         services.AddSingleton<IMessageHubPublisher, MessageHubPublisher>();
+
+        // Event-emission layer — harmless when unused; always available so consumers can
+        // inject IPlatformEventEmitter without an opt-in extension call.
+        services.AddScoped<IPlatformEventEmitter, PlatformEventEmitter>();
+        services.AddScoped<IPlatformMessageReplayService, PlatformMessageReplayService>();
+
+        switch (settings.PublishMode)
+        {
+            case MessageHubPublishMode.Immediate:
+                services.AddSingleton<IPlatformMessagePublisher, ImmediatePlatformMessagePublisher>();
+                break;
+            case MessageHubPublishMode.Background:
+                services.AddSingleton(_ => Channel.CreateUnbounded<TracedTransport<EventMessage>>());
+                services.AddSingleton<IPlatformEventChannelService, PlatformEventChannelService>();
+                services.AddSingleton<IPlatformMessagePublisher, BackgroundPlatformMessagePublisher>();
+                services.AddHostedService<PlatformEventBackgroundService>();
+                break;
+            default:
+                throw new InvalidOperationException($"Unsupported publish mode {settings.PublishMode}");
+        }
 
         var streamBuilder = new InputStreamBuilder(builder.ModuleCode, builder, [.. builder.StreamProviders]);
 
