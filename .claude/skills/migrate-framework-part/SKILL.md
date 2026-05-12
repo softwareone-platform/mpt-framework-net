@@ -5,7 +5,7 @@ description: Use when migrating or syncing code from the private mpt-library-fra
 
 # Migrate a framework part into mpt-framework-net
 
-A precedent-driven guide. Three components have already been migrated this way: **Delta** (single package), **Operation** (Abstractions + main + EFCore), **MessageHub** (Abstractions + main, no EFCore). Use them as worked examples.
+A precedent-driven guide. Components migrated so far: **Delta** (single package), **Operation** (Abstractions + main + EFCore), **MessageHub** (Abstractions + main, no EFCore), **Mapping** (Abstractions + main + EFCore, requires `Mpt.Rql` — carved out of upstream `Projections/`), and the cross-cutting **Abstractions** package (`IPlatformObject` / `IPlatformEntity` / `IRevisable`). Use them as worked examples.
 
 ## TL;DR
 
@@ -73,6 +73,8 @@ Other natural extension points (FluentValidation, AppInsights, etc.) → separat
 | Internal namespace collision (e.g. internal `Foo<,,>` shadows public `Foo`) | Rename **internal** to free the name | `OperationBuilder<,,>` (internal) renamed to `OperationRegistration<,,>` so public `OperationBuilder` exists |
 | Namespace–type clash (e.g. `Mpt.Framework.Operation.Operation<,>`) | **Acceptable** — same pattern as `Delta.Delta<T>`, `System.Threading.Tasks.Task` | Just don't introduce a non-generic class with the same name |
 | SQL table names | Plural is fine (collection-of-rows convention) | `Utils.Operations` kept plural |
+| `IServiceCollection` extension classes | Declared in `namespace Microsoft.Extensions.DependencyInjection` (with `#pragma warning disable IDE0130` + `// ReSharper disable once CheckNamespace`), so callers pick them up via the `using` they already have for `ServiceCollection` | [`MappingServiceCollectionExtensions`](src/mapping/Mpt.Framework.Mapping/MappingServiceCollectionExtensions.cs) |
+| Extension method names on `IServiceCollection` | Informative but compact. Package-named umbrella for a single-flavour engine (`AddOperation`, `AddMessageHub`); flavour-prefixed when more than one flavour exists (`AddInMemoryMapping` vs `AddEfCoreMapping<TDbContext>`). Don't over-expand (`AddInMemoryEntityMappingServices` is too much). | `AddInMemoryMapping()` / `AddEfCoreMapping<TDbContext>()` |
 
 ## Standard dependency replacements
 
@@ -89,6 +91,9 @@ When you find these in upstream code, swap them for the OSS equivalents:
 | `Mpt.Framework.Application.Events.*` (PlatformEvent, IPlatformEventEmitter, GenericEvent, etc.) | **Drop entirely** — that's the platform-events authoring layer, business-coupled to PlatformEntity. Users emit raw payloads (e.g. `EventMessage`) themselves. |
 | `IPlatformMessageInspector` / hook interfaces | Simplify to an `Action<T>?` delegate on the builder (e.g. `OnMessagePublishing`) |
 | `MassTransit.Serialization.JsonConverters.StringDecimalJsonConverter` removal hack | Just don't add it in the first place — we control the serializer options |
+| `Mpt.Framework.Core.Models.IPlatformObject` / `IPlatformEntity` / `IRevisable` | **Don't redefine.** ProjectReference the existing `src/abstractions/Mpt.Framework.Abstractions` package and use the OSS interfaces as-is. The OSS package re-homes them to the root `Mpt.Framework` namespace (not upstream's `Mpt.Framework.Core.Models`), so the only port-time change is a `using` swap. Keep the distinction between `IPlatformObject` (id-only) and `IPlatformEntity` (id + revision) — several components rely on it (e.g. the `Mapping` engine treats them differently in its reference-vs-collection paths). Note: the OSS `IPlatformEntity` drops upstream's `Name` / `Icon` (display concerns); add them as plain properties on consuming entities when needed. |
+| Upstream `src/Mpt.Framework.Application/Projections/` and `src/Mpt.Framework.Infrastructure/Projections/` (folder name) | OSS folder is `src/mapping/Mpt.Framework.Mapping{,.Abstractions}/`, package id `Mpt.Framework.Mapping`, namespace `Mpt.Framework.Mapping`. The OSS port covers only the dynamic-mapper half of upstream `Projections/`; the `IProjectionService<T>` cache wrapper was deliberately left behind. When cherry-picking later upstream changes, watch for path drift: an upstream commit touching `Projections/MappingExecutor.cs` lands in OSS `src/mapping/Mpt.Framework.Mapping/MappingExecutor.cs`. |
+| `Mpt.Framework.Application.Exceptions.EntityNotFoundException` raised from an infrastructure helper | If raised inside a helper that can't reach a domain-level "not found" type, throw `KeyNotFoundException` with a descriptive message — the BCL primitive for "you asked me to look something up by key and it isn't there". Reserve a custom exception type only when callers need to catch it specifically. |
 
 ## What to skip from upstream
 
@@ -265,13 +270,31 @@ Build + test the whole solution. Watch for new warnings.
 - **In-memory filtering mismatch with Service Bus**: at least one upstream helper (`StreamRoutingHelper.ConditionSatisfied`) compares `TargetModules` to the wrong identifier in the in-memory path vs the Service Bus SQL-rule path. The annotation `[ExcludeFromCodeCoverage(Justification = "Test purposes only")]` suggests this was intentional/approximate. Don't add tests that pin down behavior the upstream code explicitly disclaims.
 - **`OperationsBuilder` vs `OperationBuilder<,,>`** style conflicts when applying the singular rule: rename the internal generic out of the way **first**, then rename the public plural to singular. Otherwise a half-finished rename leaves a build break.
 - **Dynamic saga type cache leakage in tests**: `OperationSagaTypeBuilder.MakeSagaType` caches by `Type`. Two tests using the same nested type with different `name` arguments will see the first test's name baked into both. Give each test its own private nested type.
+- **`CollectionUpdateHelper.ProcessPrimitiveCollection` non-incrementing index** (Mapping): upstream loop reads `target[index]` against each source item but never advances `index`. Always comparing element 0 against every source item happens to work for "all equal" / "fully replaced" inputs but mis-detects same-prefix divergence. Fix it (`index++` at end of loop body) and add a targeted test — primitive collection in / primitive collection out where the change is in the middle.
+- **`MapPathAsync` is "map up to and through this property", not "map only this property"** (Mapping): the path filter exits the loop *after* processing the matching entry, but entries iterated earlier are still processed. Path filtering chains across recursion (one queue head per level), so the right mental model is "stop after walking through the named property's subtree". Don't write tests that assume earlier entries are skipped — match upstream semantics or fix upstream first.
+- **`protected internal` abstract members across assemblies must be overridden as plain `protected`** (Mapping.EFCore vs Mapping engine): if the abstract engine class exposes its extension points as `protected internal` (so `MappingExecutor` can call them via internal access while subclasses can override), a subclass in a *different* assembly cannot use `protected internal` on its override — the C# compiler emits CS0507 ("cannot change access modifiers"). Use plain `protected override` in the add-on's subclass; the virtual dispatch from the base class's `internal` call site still resolves to it.
+- **EF Core InMemory provider doesn't model "navigation not loaded" semantics**: tests that try to assert collection navigations are empty before LoadAsync will fail because the InMemory provider eagerly fixes them up through reference tracking. Either accept the looseness and assert only on observable post-Map state, or move to SQLite-in-memory if you need real lazy/explicit-loading semantics.
 
 ## References
 
-Three existing migrations live in this repo as worked examples — copy their shape when in doubt:
+Existing migrations live in this repo as worked examples — copy their shape when in doubt:
 
+- `src/abstractions/Mpt.Framework.Abstractions/` — the cross-cutting abstractions package. Hosts `IPlatformObject`, `IPlatformEntity`, `IRevisable` (re-homed from upstream's `Mpt.Framework.Core.Models` to the root `Mpt.Framework` namespace). When porting code that uses any of these, `ProjectReference` this package rather than redefining the interfaces locally; swap `using Mpt.Framework.Core.Models;` for `using Mpt.Framework;`.
 - `src/delta/` — single-package component, no Abstractions split.
 - `src/operation/` — Abstractions + main + EFCore split, fullest example.
 - `src/messagehub/` — Abstractions + main, no EFCore.
+- `src/mapping/` — Abstractions + main + EFCore. Best reference for migrations that depend on `Mpt.Rql` (sits on top of `IRqlMapAccessor` / `IRqlMapperContext`) and for migrations that lean on `IPlatformObject` / `IPlatformEntity` from `Mpt.Framework.Abstractions`. Worth a glance for the precedent of carving a tightly-scoped subset out of a much larger upstream namespace: upstream `Mpt.Framework.Application.Projections` and `Mpt.Framework.Infrastructure.Projections` cover both the dynamic mapper and an `IProjectionService<T>` cache wrapper coupled to the RQL Query subsystem; the OSS port intentionally ships only the mapper. Also a precedent for **renaming the OSS folder away from the upstream name**: upstream `Projections/` → OSS `mapping/` (and package `Mpt.Framework.Mapping`) because the cache wrapper that justified the "projection" wording isn't in scope. Also documents the precedent of dropping `UpdatablePropertyMapper` / `ComplexMappingContext` (the fluent custom-factory layer) while keeping `IUpdatableMappingFactory` so consumers can still wire factories via raw Mpt.Rql calls. The EFCore add-on (`Mpt.Framework.Mapping.EFCore`) is the cleanest precedent for an **EFCore add-on that subclasses an abstract engine type** (`DynamicEntityMapper`) and is registered with a generic `services.AddEfCoreMapping<TDbContext>()` extension that bridges the consumer's DbContext into the mapper's constructor — sidesteps the upstream `FrameworkDbContextProvider` and supports multi-DbContext setups for free.
 
 The conventions in this skill are the canonical reference; they were originally captured as personal notes during the early migrations but are duplicated here so any contributor can apply them without privileged context.
+
+## Keeping this skill current
+
+When you finish migrating a new component, before signing off:
+
+1. **Bump the count** in the TL;DR's opening sentence (`Three components` → `Four components` → …) and in the References heading.
+2. **Add a bullet to the References list** with the folder path and a one-line note on what makes that migration a useful reference — what split it uses, what unusual dependency it depends on, what new dependency-substitution or skip-rule it established. This is the part future migrations will skim for "have we already solved something like this?", so make it specific.
+3. **Promote new substitutions or skip rules** into the relevant tables (`Standard dependency replacements`, `What to skip from upstream`). If the migration only made a one-off decision, leave it as a note in the References bullet; if it generalises (any future migration touching upstream type X should do Y), the table is the right home.
+4. **Add new pitfalls** to the `Pitfalls` section when the migration uncovered a non-obvious failure mode that wasn't already documented.
+5. **Update saved memories** when the migration introduces a new cross-cutting convention (singular naming, `Abstractions` carve-out heuristic, etc.). Existing memory entries in `~/.claude/projects/.../memory/MEMORY.md` are the authoritative list; prefer updating an existing memory to adding a near-duplicate.
+
+These steps make the skill self-updating in the practical sense: every successful migration extends the body of precedent it draws on, instead of leaving the next migrator to re-derive the same decisions.

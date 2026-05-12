@@ -5,6 +5,9 @@
     <File Path=".gitignore" />
   </Folder>
   <Folder Name="/src/" />
+  <Folder Name="/src/abstractions/">
+    <Project Path="src/abstractions/Mpt.Framework.Abstractions/Mpt.Framework.Abstractions.csproj" />
+  </Folder>
   <Folder Name="/src/delta/">
     <Project Path="src/delta/Mpt.Framework.Delta/Mpt.Framework.Delta.csproj" />
     <Project Path="src/delta/Mpt.Framework.Delta.Validation/Mpt.Framework.Delta.Validation.csproj" />
@@ -18,6 +21,11 @@
     <Project Path="src/messagehub/Mpt.Framework.MessageHub.Abstractions/Mpt.Framework.MessageHub.Abstractions.csproj" />
     <Project Path="src/messagehub/Mpt.Framework.MessageHub/Mpt.Framework.MessageHub.csproj" />
   </Folder>
+  <Folder Name="/src/mapping/">
+    <Project Path="src/mapping/Mpt.Framework.Mapping.Abstractions/Mpt.Framework.Mapping.Abstractions.csproj" />
+    <Project Path="src/mapping/Mpt.Framework.Mapping/Mpt.Framework.Mapping.csproj" />
+    <Project Path="src/mapping/Mpt.Framework.Mapping.EFCore/Mpt.Framework.Mapping.EFCore.csproj" />
+  </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/delta/">
     <Project Path="tests/delta/Mpt.Framework.Delta.Tests/Mpt.Framework.Delta.Tests.csproj" />
@@ -28,5 +36,8 @@
   </Folder>
   <Folder Name="/tests/messagehub/">
     <Project Path="tests/messagehub/Mpt.Framework.MessageHub.Tests/Mpt.Framework.MessageHub.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/mapping/">
+    <Project Path="tests/mapping/Mpt.Framework.Mapping.Tests/Mpt.Framework.Mapping.Tests.csproj" />
   </Folder>
 </Solution>

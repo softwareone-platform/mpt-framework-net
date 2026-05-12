@@ -1,11 +1,13 @@
 using MassTransit;
-using Microsoft.Extensions.DependencyInjection;
+using Mpt.Framework.Operation;
 using Mpt.Framework.Operation.Communication;
 using Mpt.Framework.Operation.Configuration;
 using Mpt.Framework.Operation.Maintenance;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Mpt.Framework.Operation;
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Extensions.DependencyInjection;
 
 [ExcludeFromCodeCoverage]
 public static class OperationConfigurationExtensions

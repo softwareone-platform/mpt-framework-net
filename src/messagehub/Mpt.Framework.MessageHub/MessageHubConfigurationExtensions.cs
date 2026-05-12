@@ -1,9 +1,11 @@
 using MassTransit;
-using Microsoft.Extensions.DependencyInjection;
+using Mpt.Framework.MessageHub;
 using Mpt.Framework.MessageHub.Internal;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Mpt.Framework.MessageHub;
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+// ReSharper disable once CheckNamespace
+namespace Microsoft.Extensions.DependencyInjection;
 
 [ExcludeFromCodeCoverage(Justification = "Composition root")]
 public static class MessageHubConfigurationExtensions
