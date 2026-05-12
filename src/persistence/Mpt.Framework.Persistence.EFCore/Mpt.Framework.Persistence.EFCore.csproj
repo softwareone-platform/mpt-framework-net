@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Mpt.Framework.Persistence.EFCore</RootNamespace>
+    <AssemblyName>Mpt.Framework.Persistence.EFCore</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mpt.Framework.Persistence.EFCore</PackageId>
+    <Title>Mpt.Framework.Persistence.EFCore</Title>
+    <Description>Entity Framework Core flavour of Mpt.Framework.Persistence. Provides EfCoreRepository&lt;TDbEntity,TEntity&gt; built on top of a user-supplied DbContext, composed with the EF Core dynamic mapper from Mpt.Framework.Mapping.EFCore. Reference Mpt.Framework.Persistence.Abstractions from your Application layer.</Description>
+    <Authors>SoftwareOne and the Mpt.Framework contributors</Authors>
+    <Company>SoftwareOne</Company>
+    <Copyright>Copyright 2026 SoftwareOne and the Mpt.Framework contributors</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>persistence;repository;unitofwork;entityframeworkcore;efcore;rql</PackageTags>
+    <PackageProjectUrl>https://github.com/SoftwareONE/mpt-framework-net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoftwareONE/mpt-framework-net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" Condition="Exists('README.md')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[10.0.0,11.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mpt.Framework.Persistence\Mpt.Framework.Persistence.csproj" />
+    <ProjectReference Include="..\..\mapping\Mpt.Framework.Mapping.EFCore\Mpt.Framework.Mapping.EFCore.csproj" />
+  </ItemGroup>
+
+</Project>

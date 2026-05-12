@@ -26,6 +26,11 @@
     <Project Path="src/mapping/Mpt.Framework.Mapping/Mpt.Framework.Mapping.csproj" />
     <Project Path="src/mapping/Mpt.Framework.Mapping.EFCore/Mpt.Framework.Mapping.EFCore.csproj" />
   </Folder>
+  <Folder Name="/src/persistence/">
+    <Project Path="src/persistence/Mpt.Framework.Persistence.Abstractions/Mpt.Framework.Persistence.Abstractions.csproj" />
+    <Project Path="src/persistence/Mpt.Framework.Persistence/Mpt.Framework.Persistence.csproj" />
+    <Project Path="src/persistence/Mpt.Framework.Persistence.EFCore/Mpt.Framework.Persistence.EFCore.csproj" />
+  </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/delta/">
     <Project Path="tests/delta/Mpt.Framework.Delta.Tests/Mpt.Framework.Delta.Tests.csproj" />
@@ -39,5 +44,8 @@
   </Folder>
   <Folder Name="/tests/mapping/">
     <Project Path="tests/mapping/Mpt.Framework.Mapping.Tests/Mpt.Framework.Mapping.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/persistence/">
+    <Project Path="tests/persistence/Mpt.Framework.Persistence.Tests/Mpt.Framework.Persistence.Tests.csproj" />
   </Folder>
 </Solution>

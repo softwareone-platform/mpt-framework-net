@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Mpt.Framework.Persistence</RootNamespace>
+    <AssemblyName>Mpt.Framework.Persistence.Abstractions</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>Mpt.Framework.Persistence.Abstractions</PackageId>
+    <Title>Mpt.Framework.Persistence.Abstractions</Title>
+    <Description>Abstractions for Mpt.Framework.Persistence — the repository / unit-of-work contracts, query service surface, policy DSL, entity-configuration / lifecycle-hook / event-producer interfaces, and supporting POCOs. Reference this package from your Application layer to define entities, configurations, and consumers without taking a dependency on EF Core or RQL internals.</Description>
+    <Authors>SoftwareOne and the Mpt.Framework contributors</Authors>
+    <Company>SoftwareOne</Company>
+    <Copyright>Copyright 2026 SoftwareOne and the Mpt.Framework contributors</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>persistence;repository;unitofwork;query;rules;abstractions</PackageTags>
+    <PackageProjectUrl>https://github.com/SoftwareONE/mpt-framework-net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SoftwareONE/mpt-framework-net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" Condition="Exists('README.md')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="[11.10.0,13.0.0)" />
+    <PackageReference Include="Mpt.Rql" Version="[1.13.0,2.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\abstractions\Mpt.Framework.Abstractions\Mpt.Framework.Abstractions.csproj" />
+    <ProjectReference Include="..\..\delta\Mpt.Framework.Delta\Mpt.Framework.Delta.csproj" />
+    <ProjectReference Include="..\..\messagehub\Mpt.Framework.MessageHub.Abstractions\Mpt.Framework.MessageHub.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>
