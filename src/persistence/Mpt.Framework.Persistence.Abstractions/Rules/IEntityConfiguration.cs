@@ -11,7 +11,9 @@ public interface IEntityConfiguration;
 /// which roles (<see cref="IActionPolicy{TEntity}"/>) and which property-level update
 /// rules apply (<see cref="IUpdatePolicy{TEntity}"/>).
 /// </summary>
-/// <typeparam name="TEntity">The entity being configured.</typeparam>
+/// <typeparam name="TEntity">The entity being configured. Used as a phantom type for DI keying — implementations are registered and resolved by <c>IEntityConfiguration&lt;T&gt;</c>.</typeparam>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S2326:Unused type parameters should be removed",
+    Justification = "Phantom type parameter used for DI registration / resolution keying.")]
 public interface IEntityConfiguration<in TEntity> : IEntityConfiguration
 {
     /// <summary>Returns true if the action is permitted for any of <paramref name="roles"/>.</summary>

@@ -23,7 +23,7 @@ public interface IEntityActionContext<out TEntity>
 /// Context passed to <see cref="IEntityLifecycleHooks{TEntity}.OnUpdatingAsync"/>. Adds
 /// access to the original entity state before any in-place mutations.
 /// </summary>
-public interface IEntityUpdatingContext<TEntity> : IEntityActionContext<TEntity>
+public interface IEntityUpdatingContext<out TEntity> : IEntityActionContext<TEntity>
 {
     /// <summary>
     /// Snapshot of the entity captured at the time it was read for update. Modifying

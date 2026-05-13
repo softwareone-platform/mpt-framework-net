@@ -59,7 +59,8 @@ public sealed class PlatformEventPermissionsBuilder
         return this;
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Helper property for fluent API.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Helper for fluent API — must be an instance method to be reachable via builder chains.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Code Smell", "S2325:Methods and properties that don't access instance data should be static", Justification = "Helper for fluent API — must be an instance method to be reachable via builder chains.")]
     public ValueTask CompletedTask() => ValueTask.CompletedTask;
 
     public IReadOnlyList<EventMessagePrincipalAccess> PrincipalAccess => _principalAccess;

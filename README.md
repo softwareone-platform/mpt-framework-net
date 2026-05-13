@@ -3,7 +3,7 @@
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=softwareone-platform_mpt-framework-net&metric=alert_status)](https://sonarcloud.io/project/overview?id=softwareone-platform_mpt-framework-net)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=softwareone-platform_mpt-framework-net&metric=coverage)](https://sonarcloud.io/component_measures?id=softwareone-platform_mpt-framework-net&metric=coverage)
 [![NuGet](https://img.shields.io/nuget/v/Mpt.Framework.Abstractions?label=Mpt.Framework.Abstractions)](https://www.nuget.org/packages/Mpt.Framework.Abstractions)
-[![License](https://img.shields.io/github/license/softwareone/mpt-framework-net)](LICENSE)
+[![License](https://img.shields.io/github/license/softwareone-platform/mpt-framework-net)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
 
 ## Overview

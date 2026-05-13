@@ -20,7 +20,7 @@ public abstract class QueryService<TDbEntity, TEntity>(
     IFilterProvider<TDbEntity> customFilterProvider)
     : IQueryService<TEntity>
     where TDbEntity : class
-    where TEntity : IRqlGraphHolder
+    where TEntity : class, IRqlGraphHolder
 {
     /// <inheritdoc />
     public async Task<object?> GetAsObjectAsync(object id, RqlRequest request, CancellationToken cancellationToken, Action<IRqlSettings>? configure = null)

@@ -64,7 +64,7 @@ public class DeltaJsonConverterTests
             WithFactory());
 
         delta!.TryGetDelta(u => u.Address, out var address).Should().BeTrue();
-        address.TryGetDelta(a => a.City, out var city).Should().BeTrue();
+        address!.TryGetDelta(a => a.City, out var city).Should().BeTrue();
         city.Data.Should().Be("NYC");
 
         // Street wasn't in the JSON, even though Address was:

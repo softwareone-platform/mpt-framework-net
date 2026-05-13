@@ -11,7 +11,7 @@ internal class TestUser
     public string? Email { get; set; }
 
     [JsonPropertyName("address")]
-    public TestAddress? Address { get; set; }
+    public TestAddress Address { get; set; } = new();
 
     [JsonPropertyName("tags")]
     public List<TestTag>? Tags { get; set; }
@@ -20,10 +20,10 @@ internal class TestUser
 internal class TestAddress
 {
     [JsonPropertyName("street")]
-    public string? Street { get; set; }
+    public string Street { get; set; } = string.Empty;
 
     [JsonPropertyName("city")]
-    public string? City { get; set; }
+    public string City { get; set; } = string.Empty;
 }
 
 internal class TestTag

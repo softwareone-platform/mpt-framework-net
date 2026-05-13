@@ -66,11 +66,6 @@ public abstract class UnitOfWork(IServiceProvider serviceProvider, ILogger<UnitO
             logger.LogWarning(exc, "After-save activity failed. Executing failure handler.");
             await afterSaveActivityFailure(exc, cancellationToken);
         }
-        catch (Exception exc)
-        {
-            logger.LogError(exc, "After-save activity failed with unhandled exception.");
-            throw;
-        }
     }
 
     /// <inheritdoc />

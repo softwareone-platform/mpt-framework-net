@@ -72,13 +72,14 @@ public class EfCoreRepository<TDbEntity, TEntity>(
         item.Revision++;
         var updateCount = await entityMapper.MapAsync(item, dbItem);
 
-        // The Revision++ above counts as one change; anything > 1 is a real domain mutation.
+        // Bumping the revision number above counts as one change; anything beyond that
+        // indicates a real domain mutation supplied by the caller.
         var hasChanges = updateCount > 1;
 
         if (!hasChanges)
         {
-            // No real change — roll back the speculative Revision++ and detach the entity
-            // from the change tracker so EF doesn't emit an UPDATE.
+            // No real change happened. Roll back the speculative revision bump and detach
+            // the entity from the change tracker so EF does not emit an update statement.
             item.Revision--;
             dbContext.Entry(dbItem).State = EntityState.Unchanged;
         }
