@@ -1,9 +1,12 @@
 using MassTransit;
 using Mpt.Framework.Operation.Models;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace Mpt.Framework.Operation.Activities;
 
+[SuppressMessage("Maintainability", "S2436:Types and methods should not have too many generic parameters",
+    Justification = "MassTransit saga pattern requires binding three independent generic types: the operation contract, the per-task message, and the saga state.")]
 internal class OperationFinishedActivity<TOperation, TTask, TSaga>(IOperation<TOperation, TTask> handler) : IStateMachineActivity<TSaga>
     where TOperation : IOperationContract
     where TSaga : OperationSaga

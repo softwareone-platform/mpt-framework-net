@@ -2,12 +2,15 @@ using MassTransit;
 using Mpt.Framework.Operation.Activities;
 using Mpt.Framework.Operation.Models;
 using Mpt.Framework.Operation.Models.Messages;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace Mpt.Framework.Operation;
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
+[SuppressMessage("Maintainability", "S2436:Types and methods should not have too many generic parameters",
+    Justification = "MassTransit state-machine pattern requires binding three independent generic types: the operation contract, the per-task message, and the saga state.")]
 internal class OperationExecutor<TOperation, TTask, TSaga> : MassTransitStateMachine<TSaga>
     where TOperation : IOperationContract
     where TSaga : OperationSaga

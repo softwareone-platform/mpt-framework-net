@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\operation\Mpt.Framework.Operation\Mpt.Framework.Operation.csproj" />
+    <ProjectReference Include="..\..\..\src\operation\Mpt.Framework.Operation.EFCore\Mpt.Framework.Operation.EFCore.csproj" />
   </ItemGroup>
 
 </Project>

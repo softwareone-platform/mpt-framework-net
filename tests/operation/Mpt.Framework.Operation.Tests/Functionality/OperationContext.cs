@@ -83,7 +83,7 @@ public class OperationContext<TOperation> : IAsyncDisposable
         }
     }
 
-    private IServiceProvider MakeOperationProvider()
+    private ServiceProvider MakeOperationProvider()
     {
         var services = new ServiceCollection();
         services.AddLogging();

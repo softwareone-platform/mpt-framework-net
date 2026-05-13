@@ -20,13 +20,7 @@ public abstract class DeltaNode(string name)
 
     internal DeltaNode Copy()
     {
-        DeltaNode node = this switch
-        {
-            DeltaObjectNode => new DeltaObjectNode(Name),
-            DeltaArrayNode => new DeltaArrayNode(Name),
-            DeltaValueNode => new DeltaValueNode(Name),
-            _ => throw new NotSupportedException($"Unsupported node type: {GetType().Name}"),
-        };
+        var node = CreateSameTyped();
 
         foreach (var child in _children.Values)
         {
@@ -35,6 +29,12 @@ public abstract class DeltaNode(string name)
 
         return node;
     }
+
+    /// <summary>
+    /// Creates a new empty (child-less) node of the same concrete type, preserving <see cref="Name"/>.
+    /// Used by <see cref="Copy"/> to dispatch construction polymorphically without a <c>this</c> type-check.
+    /// </summary>
+    private protected abstract DeltaNode CreateSameTyped();
 
     internal static DeltaNode FromJsonNode(string name, JsonNode json)
     {
@@ -90,14 +90,20 @@ public abstract class DeltaNode(string name)
 internal class DeltaObjectNode : DeltaNode
 {
     internal DeltaObjectNode(string name) : base(name) { }
+
+    private protected override DeltaNode CreateSameTyped() => new DeltaObjectNode(Name);
 }
 
 internal class DeltaArrayNode : DeltaNode
 {
     internal DeltaArrayNode(string name) : base(name) { }
+
+    private protected override DeltaNode CreateSameTyped() => new DeltaArrayNode(Name);
 }
 
 internal class DeltaValueNode : DeltaNode
 {
     internal DeltaValueNode(string name) : base(name) { }
+
+    private protected override DeltaNode CreateSameTyped() => new DeltaValueNode(Name);
 }

@@ -88,7 +88,7 @@ public class DeltaBuilderTests
         name.Should().Be("Alice");
 
         delta.TryGetDelta(u => u.Address, out var addressDelta).Should().BeTrue();
-        addressDelta.TryGet(a => a.City, out var city).Should().BeTrue();
+        addressDelta!.TryGet(a => a.City, out var city).Should().BeTrue();
         city.Should().Be("NYC");
     }
 

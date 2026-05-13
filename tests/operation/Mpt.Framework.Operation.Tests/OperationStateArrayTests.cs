@@ -40,7 +40,7 @@ public class OperationStateArrayTests
     public void Constructor_WithInvalidLength_ShouldThrowArgumentException(int invalidLength)
     {
         // Act & Assert
-        Action act = () => new OperationStateArray(invalidLength);
+        Action act = () => { _ = new OperationStateArray(invalidLength); };
         act.Should().Throw<ArgumentOutOfRangeException>()
             .WithMessage("Length must be positive. (Parameter 'length')");
     }
@@ -49,7 +49,7 @@ public class OperationStateArrayTests
     public void Constructor_WithNullData_ShouldThrowArgumentNullException()
     {
         // Act & Assert
-        Action act = () => new OperationStateArray(null!, 2);
+        Action act = () => { _ = new OperationStateArray(null!, 2); };
         act.Should().Throw<ArgumentNullException>();
     }
 

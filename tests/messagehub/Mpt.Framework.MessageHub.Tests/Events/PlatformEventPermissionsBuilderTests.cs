@@ -78,9 +78,12 @@ public class PlatformEventPermissionsBuilderTests
     }
 
     [Fact]
-    public async Task CompletedTask_ReturnsCompletedValueTask()
+    public void CompletedTask_ReturnsCompletedValueTask()
     {
         var builder = new PlatformEventPermissionsBuilder();
-        await builder.CompletedTask();
+
+        var result = builder.CompletedTask();
+
+        result.IsCompletedSuccessfully.Should().BeTrue();
     }
 }

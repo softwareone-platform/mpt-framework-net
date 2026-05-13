@@ -27,6 +27,7 @@ public class EfCoreDynamicEntityMapperTests : IDisposable
     {
         _db.Dispose();
         _services.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     [Fact]

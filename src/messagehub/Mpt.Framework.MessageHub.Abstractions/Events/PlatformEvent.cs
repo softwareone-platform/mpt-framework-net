@@ -69,13 +69,6 @@ public abstract class PlatformEvent : IPlatformEvent
             PartitionKey = GetPartitionKey()
         };
 
-#pragma warning disable CS0618
-        if (!IsTrusted)
-        {
-            msg.Hints |= EventHints.Incomplete;
-        }
-#pragma warning restore CS0618
-
         return msg;
     }
 
@@ -147,13 +140,6 @@ public abstract class PlatformEvent : IPlatformEvent
     protected virtual PlatformEventPermissionsBuilder MakePermissionsBuilder() => new();
 
     protected virtual void ConfigurePermissions(PlatformEventPermissionsBuilder builder) { }
-
-    /// <summary>
-    /// When <see langword="false"/>, the produced message has <see cref="EventHints.Incomplete"/>
-    /// OR'd into <see cref="EventMessage.Hints"/>.
-    /// </summary>
-    [Obsolete("Use Hints instead")]
-    protected virtual bool IsTrusted => true;
 
     public virtual EventHints Hints { get; set; }
 

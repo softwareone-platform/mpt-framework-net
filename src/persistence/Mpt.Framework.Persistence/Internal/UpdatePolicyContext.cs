@@ -25,7 +25,7 @@ internal class UpdatePolicyContext(
     public PropertyHints DefaultHints { get; private set; } = defaultHints;
 
     public (PolicyRuleAccess Access, PropertyHints Hints, ValidationResult ValidationResult) Execute<TEntity>(
-        IReadOnlyCollection<string> evaluationRoles,
+        IReadOnlyCollection<string> roles,
         TEntity entity,
         Delta<TEntity> delta,
         object? original,
@@ -35,7 +35,7 @@ internal class UpdatePolicyContext(
         var data = new UpdatePolicyDataBag<TEntity>
         {
             Action = Action,
-            Roles = evaluationRoles,
+            Roles = roles,
             Entity = entity,
             Delta = delta,
             IsDefined = isDefined,

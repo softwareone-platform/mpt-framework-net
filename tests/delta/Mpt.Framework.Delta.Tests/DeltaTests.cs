@@ -163,7 +163,7 @@ public class DeltaTests
 
         mapped.IsDefined.Should().BeTrue();
         mapped.TryGetDelta(t => t.Address, out var addressDelta).Should().BeTrue();
-        addressDelta.TryGet(a => a.City, out var city).Should().BeTrue();
+        addressDelta!.TryGet(a => a.City, out var city).Should().BeTrue();
         city.Should().Be("NYC");
 
         // "name" exists on source but not target — silently dropped (no extra properties on target).
@@ -184,8 +184,33 @@ public class DeltaTests
         target.Data.Should().BeNull();
     }
 
+    [Fact]
+    public void MapTo_WithArrayProperty_PreservesArrayShapeAndItemValues()
+    {
+        // Exercises the array-node branch of DeltaNode.Copy() — without this scenario the
+        // DeltaArrayNode.CreateSameTyped() override would never be hit by the test suite.
+        var source = DeltaBuilder.FromObject<TestUser>(new
+        {
+            name = "Alice",
+            tags = new[]
+            {
+                new { name = "first" },
+                new { name = "second" },
+            },
+        });
+
+        var mapped = source.MapTo<TestUser>();
+
+        mapped.IsDefined.Should().BeTrue();
+        mapped.TryGetDelta(u => u.Tags, out var tagsDelta).Should().BeTrue();
+        tagsDelta!.IsDefined.Should().BeTrue();
+        mapped.Data!.Tags!.Should().HaveCount(2);
+        mapped.Data.Tags![0].Name.Should().Be("first");
+        mapped.Data.Tags[1].Name.Should().Be("second");
+    }
+
     private class TestAddressOnly
     {
-        public TestAddress? Address { get; set; }
+        public TestAddress Address { get; set; } = new();
     }
 }

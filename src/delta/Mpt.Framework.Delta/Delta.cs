@@ -102,12 +102,12 @@ public class Delta<TData> : IDelta<TData>
         }
 
         var mappedNode = Node!.Copy();
-        if (Data != null)
+        if (Data is not null)
         {
             var json = JsonSerializer.Serialize(Data, DeltaJsonSerializerOptions.Options);
             var targetData = JsonSerializer.Deserialize<TTarget>(json, DeltaJsonSerializerOptions.Options);
 
-            if (targetData != null)
+            if (targetData is not null)
             {
                 mappedNode.SetData(targetData);
             }

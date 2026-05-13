@@ -15,7 +15,7 @@ public class InputStreamProviderTests
         stream.Provider.Should().Be("test");
         stream.Name.Should().Be("orders");
         stream.Sources.Should().Be(StreamTypes.Events);
-        stream.ConsumerType.Should().Be(typeof(TestConsumer));
+        stream.ConsumerType.Should().Be<TestConsumer>();
     }
 
     [Fact]

@@ -15,9 +15,19 @@ public sealed class GenericDeletedEvent<TEntity>(
     protected override string GetSummary(string entityName)
         => $"{entityName} deleted";
 
-    [Obsolete("Use Hints instead")]
-    protected override bool IsTrusted => false;
+    /// <summary>
+    /// Marks the deleted-event message as <see cref="EventHints.Incomplete"/> by default —
+    /// only the entity ID survives the delete, so downstream consumers should fetch any
+    /// additional context elsewhere. Callers can replace the value if needed.
+    /// </summary>
+    public override EventHints Hints { get; set; } = EventHints.Incomplete;
 
+    /// <summary>
+    /// Intentionally empty — a deleted entity has no permissions to project: the
+    /// authorisation envelope from the originating create/update events governs who
+    /// receives the deletion. Override this in a derived event if you need to override
+    /// that behaviour for a specific entity type.
+    /// </summary>
     protected sealed override void ConfigurePermissions(PlatformEventPermissionsBuilder builder)
     {
     }

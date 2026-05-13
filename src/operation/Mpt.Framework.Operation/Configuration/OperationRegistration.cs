@@ -103,7 +103,7 @@ internal class OperationRegistration<TOperation, TTask, TSaga>(OperationDescript
         });
     }
 
-    private void ConfigureGroup(IBusRegistrationContext context, IReceiveEndpointConfigurator configurator, MessageGroup group)
+    private static void ConfigureGroup(IBusRegistrationContext context, IReceiveEndpointConfigurator configurator, MessageGroup group)
     {
         switch (group)
         {
