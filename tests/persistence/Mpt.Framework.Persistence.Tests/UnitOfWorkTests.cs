@@ -15,7 +15,9 @@ public class UnitOfWorkTests
         await using var sp = PersistenceFixture.Build();
         var uow = sp.GetRequiredService<IUnitOfWork>();
 
-        await uow.SaveChangesAsync(CancellationToken.None);
+        var act = async () => await uow.SaveChangesAsync(CancellationToken.None);
+
+        await act.Should().NotThrowAsync();
     }
 
     [Fact]
