@@ -2,7 +2,9 @@
   <Folder Name="/Solution Items/">
     <File Path="LICENSE" />
     <File Path="NOTICE" />
+    <File Path="README.md" />
     <File Path=".gitignore" />
+    <File Path="coverlet.runsettings" />
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/abstractions/">
