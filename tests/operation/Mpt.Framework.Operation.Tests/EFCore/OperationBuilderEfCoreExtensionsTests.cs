@@ -26,7 +26,7 @@ public class OperationBuilderEfCoreExtensionsTests
 
         var act = () => builder.UseSqlServerPersistence(connectionString!);
 
-        act.Should().Throw<ArgumentException>().WithParameterName("connectionString");
+        act.Should().Throw<ArgumentException>().WithParameterName(nameof(connectionString));
     }
 
     [Fact]

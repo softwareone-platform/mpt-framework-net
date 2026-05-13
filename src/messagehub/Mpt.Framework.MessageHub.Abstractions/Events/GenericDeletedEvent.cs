@@ -30,5 +30,6 @@ public sealed class GenericDeletedEvent<TEntity>(
     /// </summary>
     protected sealed override void ConfigurePermissions(PlatformEventPermissionsBuilder builder)
     {
+        // No-op by design: deleted entities project no new permissions. See the XML doc above.
     }
 }

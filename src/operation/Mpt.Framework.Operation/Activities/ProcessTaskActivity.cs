@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Mpt.Framework.Operation.Activities;
 
 [SuppressMessage("Maintainability", "S2436", Justification = "Three params are needed")]
+[ExcludeFromCodeCoverage(Justification = "MassTransit state-machine activity — exercised end-to-end by the in-memory operation round-trip tests; framework-internal boilerplate (Accept/Probe/Faulted) is not usefully unit-testable.")]
 internal class ProcessTaskActivity<TOperation, TTask, TSaga>(IOperationMessageSender<TOperation> sender, IOperationProvider operationProvider, IOperation<TOperation, TTask> handler, ILogger<ProcessTaskActivity<TOperation, TTask, TSaga>> logger)
     : IStateMachineActivity<TSaga, TaskStartingMessage<TTask>>
     where TOperation : IOperationContract

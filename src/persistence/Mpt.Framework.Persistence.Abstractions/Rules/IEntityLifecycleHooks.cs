@@ -11,7 +11,7 @@ public interface IEntityLifecycleHooks;
 /// the underlying persistence layer commits each pending entity. Override to apply
 /// invariants, derived values, or domain rules just-in-time before the write.
 /// </summary>
-public interface IEntityLifecycleHooks<TEntity> : IEntityLifecycleHooks where TEntity : IPlatformEntity
+public interface IEntityLifecycleHooks<in TEntity> : IEntityLifecycleHooks where TEntity : IPlatformEntity
 {
     /// <summary>Invoked once for each entity being created, before the persistence-side insert.</summary>
     Task OnCreatingAsync(IEntityActionContext<TEntity> context, CancellationToken cancellationToken);

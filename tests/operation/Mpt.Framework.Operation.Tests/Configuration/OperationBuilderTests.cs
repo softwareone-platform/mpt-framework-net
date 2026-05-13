@@ -67,6 +67,17 @@ public class OperationBuilderTests
             "dispatch-only hosts never execute the handler, so the type should not be registered");
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Constructor_WithBlankModuleCode_Throws(string? moduleCode)
+    {
+        var act = () => new OperationBuilder(new ServiceCollection(), moduleCode!, new OperationSettings());
+
+        act.Should().Throw<ArgumentException>().WithParameterName("moduleCode");
+    }
+
     private static OperationBuilder NewBuilder() =>
         new(new ServiceCollection(), "test", new OperationSettings());
 

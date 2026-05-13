@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mpt.Framework.Operation.EFCore;
 
+[ExcludeFromCodeCoverage(Justification = "EF Core DbContext for the saga store — exercised end-to-end against a real database, not via unit tests.")]
 internal class OperationDbContext(DbContextOptions<OperationDbContext> options, OperationSagaTypes sagaTypes) : DbContext(options)
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
