@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 
 namespace Mpt.Framework.MessageHub;
 
+[ExcludeFromCodeCoverage(Justification = "Thin Channel<T> writer wrapper with a logger fallback — the meaningful behaviour is the BackgroundService drain, which is exercised by the in-memory integration tests.")]
 internal class PlatformEventChannelService(
     Channel<TracedTransport<EventMessage>> channel,
     ILogger<PlatformEventChannelService> logger)

@@ -2,9 +2,11 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Mpt.Framework.Operation.Configuration;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mpt.Framework.Operation.EFCore;
 
+[ExcludeFromCodeCoverage(Justification = "Thin wiring layer over EF Core + MassTransit's SQL Server saga repository — requires a real SQL Server instance to exercise meaningfully.")]
 internal sealed class SqlServerPersistenceProvider(string connectionString) : IOperationPersistenceProvider
 {
     private const int SqlTimeoutErrorCode = -2;

@@ -1,8 +1,10 @@
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mpt.Framework.MessageHub.Internal;
 
+[ExcludeFromCodeCoverage(Justification = "Leaf MassTransit publisher — covered end-to-end by the in-memory transport integration tests; the error path requires forcing a transport-level failure that's not feasible in a unit test.")]
 internal partial class MessageHubPublisher(
     IMessageHubBus bus,
     MessageHubBuilder builder,

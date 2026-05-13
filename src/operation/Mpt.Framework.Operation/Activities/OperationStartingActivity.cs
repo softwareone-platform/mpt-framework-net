@@ -2,9 +2,11 @@ using MassTransit;
 using Mpt.Framework.Operation.Communication;
 using Mpt.Framework.Operation.Models;
 using Mpt.Framework.Operation.Models.Messages;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mpt.Framework.Operation.Activities;
 
+[ExcludeFromCodeCoverage(Justification = "MassTransit state-machine activity — exercised end-to-end by the in-memory operation round-trip tests; the framework-internal boilerplate (Accept/Probe/Faulted) is not usefully unit-testable.")]
 internal class OperationStartingActivity<TOperation, TSaga>(IOperationMessageSender<TOperation> sender) : IStateMachineActivity<TSaga, OperationStartingMessage<TOperation>>
     where TSaga : OperationSaga
 {

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace Mpt.Framework.Persistence;
@@ -19,6 +20,7 @@ public interface IUpdatePolicy<TEntity>
 /// Convenience extensions for the common Allow/Forbid/Require/Ignore-property cases
 /// that don't need to nest into the property's children.
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "Thin extension shims that forward to UpdatePolicyBuilders — the underlying builder is exercised by the persistence integration tests.")]
 public static class UpdatePolicyExtensions
 {
     /// <summary>Allow the named property to be set.</summary>
@@ -42,6 +44,7 @@ public static class UpdatePolicyExtensions
 /// Convenience extensions for <see cref="IUpdatePolicyProperty{TRoot, TProperty}"/> that
 /// pair Allow/Forbid/Require with an action filter or with a single nested property.
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "Thin extension shims that forward to UpdatePolicyBuilders — the underlying builder is exercised by the persistence integration tests.")]
 public static class UpdatePolicyPropertyExtensions
 {
     /// <summary>Allow a nested property to be set.</summary>
