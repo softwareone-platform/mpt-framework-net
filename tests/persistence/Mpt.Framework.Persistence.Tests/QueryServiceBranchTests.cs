@@ -108,4 +108,99 @@ public class QueryServiceBranchTests
 
         await act.Should().ThrowAsync<Exception>();
     }
+
+    [Fact]
+    public async Task GetAsync_WithRqlFilterAlone_ResolvesSingleMatch()
+    {
+        // Exercises the IQueryService<T>.GetAsync(RqlRequest, ct, configure?) default-interface
+        // overload (no-id, no-callback). It forwards to GetAsync(request, queryCallback, ct, configure)
+        // with the identity callback.
+        using var services = PersistenceFixture.Build();
+        using var scope = services.CreateScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<WidgetDbContext>();
+        db.Widgets.Add(new WidgetDbEntity { Id = "w1", Name = "alpha", Count = 7 });
+        await db.SaveChangesAsync();
+
+        var queryService = scope.ServiceProvider.GetRequiredService<IQueryService<WidgetView>>();
+        var view = await queryService.GetAsync(new RqlRequest { Filter = "eq(id,w1)" }, CancellationToken.None);
+
+        view.Should().NotBeNull();
+        view!.Id.Should().Be("w1");
+    }
+
+    [Fact]
+    public async Task GetAsync_WithIdAndRqlRequest_ResolvesEntityWithoutCallback()
+    {
+        // Exercises the IQueryService<T>.GetAsync(id, request, ct, configure?) default-interface
+        // overload (no-callback) — it supplies the identity queryCallback.
+        using var services = PersistenceFixture.Build();
+        using var scope = services.CreateScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<WidgetDbContext>();
+        db.Widgets.Add(new WidgetDbEntity { Id = "w1", Name = "alpha", Count = 7 });
+        await db.SaveChangesAsync();
+
+        var queryService = scope.ServiceProvider.GetRequiredService<IQueryService<WidgetView>>();
+        var view = await queryService.GetAsync("w1", new RqlRequest(), CancellationToken.None);
+
+        view.Should().NotBeNull();
+        view!.Id.Should().Be("w1");
+    }
+
+    [Fact]
+    public async Task GetOrThrowAsync_ThroughQueryService_ThrowsWhenMissing()
+    {
+        // Exercises the IQueryService<T>.GetOrThrowAsync default-interface state machine
+        // (the version on IQueryService, not on IRepository).
+        using var services = PersistenceFixture.Build();
+        using var scope = services.CreateScope();
+
+        var queryService = scope.ServiceProvider.GetRequiredService<IQueryService<WidgetView>>();
+
+        var act = async () => await queryService.GetOrThrowAsync("missing", CancellationToken.None);
+        await act.Should().ThrowAsync<PersistenceEntityNotFoundException>();
+    }
+
+    [Fact]
+    public async Task GetShapedAsync_WithoutRqlRequest_ResolvesProjection()
+    {
+        // Exercises the IQueryService<T>.GetShapedAsync(id, shaper, ct, configure?) default-interface
+        // overload — it supplies a fresh RqlRequest and forwards to the request-accepting version.
+        using var services = PersistenceFixture.Build();
+        using var scope = services.CreateScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<WidgetDbContext>();
+        db.Widgets.Add(new WidgetDbEntity { Id = "w1", Name = "alpha", Count = 11 });
+        await db.SaveChangesAsync();
+
+        var queryService = scope.ServiceProvider.GetRequiredService<IQueryService<WidgetView>>();
+        var shaped = await queryService.GetShapedAsync(
+            "w1",
+            w => new { w.Id, w.Count },
+            CancellationToken.None);
+
+        shaped.Should().NotBeNull();
+        shaped!.Id.Should().Be("w1");
+        shaped.Count.Should().Be(11);
+    }
+
+    [Fact]
+    public async Task GetAsObjectAsync_WithJustId_ResolvesEntityBoxed()
+    {
+        // Exercises the IQueryService.GetAsObjectAsync(id, ct, configure?) non-generic
+        // default-interface overload — it forwards to the RqlRequest variant.
+        using var services = PersistenceFixture.Build();
+        using var scope = services.CreateScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<WidgetDbContext>();
+        db.Widgets.Add(new WidgetDbEntity { Id = "w1", Name = "alpha", Count = 7 });
+        await db.SaveChangesAsync();
+
+        IQueryService queryService = scope.ServiceProvider.GetRequiredService<IQueryService<WidgetView>>();
+        var boxed = await queryService.GetAsObjectAsync("w1", CancellationToken.None);
+
+        boxed.Should().NotBeNull();
+        boxed.Should().BeAssignableTo<WidgetView>();
+    }
 }

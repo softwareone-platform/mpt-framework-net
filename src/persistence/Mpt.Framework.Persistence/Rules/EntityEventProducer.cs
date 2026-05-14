@@ -35,9 +35,6 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         return _eventPolicy.IsDefined(action);
     }
 
-    public Task ProduceCreatedEvents(TEntity entity, CancellationToken cancellationToken)
-        => ProduceCreatedEvents(entity, _ => { }, cancellationToken);
-
     public async Task ProduceCreatedEvents(TEntity entity, Action<PlatformEvent> configure, CancellationToken cancellationToken)
     {
         if (_eventEmitter is null) return;
@@ -54,9 +51,6 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         _eventEmitter.Register(@event);
     }
 
-    public Task ProduceUpdatedEvents(TEntity entity, TEntity? original, CancellationToken cancellationToken)
-        => ProduceUpdatedEvents(entity, original, _ => { }, cancellationToken);
-
     public async Task ProduceUpdatedEvents(TEntity entity, TEntity? original, Action<PlatformEvent> configure, CancellationToken cancellationToken)
     {
         if (_eventEmitter is null) return;
@@ -72,9 +66,6 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         @event.Customize(customization);
         _eventEmitter.Register(@event);
     }
-
-    public Task ProduceStatusChangedEvents(TEntity entity, TEntity? original, Func<TEntity, string> statusResolver, CancellationToken cancellationToken)
-        => ProduceStatusChangedEvents(entity, original, statusResolver, _ => { }, cancellationToken);
 
     public async Task ProduceStatusChangedEvents(TEntity entity, TEntity? original, Func<TEntity, string> statusResolver, Action<PlatformEvent> configure, CancellationToken cancellationToken)
     {
@@ -94,9 +85,6 @@ public class EntityEventProducer<TEntity> : IEntityEventProducer<TEntity>
         // Status change supersedes a regular Updated event for the same entity in this scope.
         CustomizeEvents(entity, EntityEventTypes.Updated, t => t.IsSuppressed = true);
     }
-
-    public Task ProduceDeletedEvents(TEntity entity, CancellationToken cancellationToken)
-        => ProduceDeletedEvents(entity, _ => { }, cancellationToken);
 
     public async Task ProduceDeletedEvents(TEntity entity, Action<PlatformEvent> configure, CancellationToken cancellationToken)
     {

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Mpt.Framework.Persistence.Tests.Fixtures;
+using Mpt.Rql;
 
 namespace Mpt.Framework.Persistence.Tests;
 
@@ -223,5 +224,60 @@ public class RepositoryReadAndListTests
 
         var rows = await db.Widgets.AsNoTracking().ToListAsync();
         rows.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CountAsync_WithRqlRequest_ReturnsMatchCount()
+    {
+        // Exercises the IRepository<T>.CountAsync(RqlRequest, ct) default-interface
+        // overload (forwards to CountAsync(filter, configure, ct) with the request in
+        // the options bag).
+        using var services = PersistenceFixture.Build();
+        using var scope = services.CreateScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<WidgetDbContext>();
+        db.Widgets.AddRange(
+            new WidgetDbEntity { Id = "w1", Name = "alpha", Count = 1 },
+            new WidgetDbEntity { Id = "w2", Name = "beta", Count = 2 },
+            new WidgetDbEntity { Id = "w3", Name = "alpha", Count = 3 });
+        await db.SaveChangesAsync();
+
+        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var repo = uow.GetRepository<WidgetView>();
+        var count = await repo.CountAsync(new RqlRequest(), CancellationToken.None);
+
+        count.Should().Be(3);
+    }
+
+    [Fact]
+    public async Task GetOrThrowAsync_WithConfigure_ReturnsEntityWhenFound()
+    {
+        // Exercises the IRepository<T>.GetOrThrowAsync(id, configure, ct) default-interface
+        // overload (the one that takes a configure delegate and forwards to GetAsync).
+        using var services = PersistenceFixture.Build();
+        using var scope = services.CreateScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<WidgetDbContext>();
+        db.Widgets.Add(new WidgetDbEntity { Id = "w1", Name = "alpha", Count = 7 });
+        await db.SaveChangesAsync();
+
+        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var repo = uow.GetRepository<WidgetView>();
+        var view = await repo.GetOrThrowAsync("w1", static _ => { }, CancellationToken.None);
+
+        view.Should().NotBeNull();
+        view.Name.Should().Be("alpha");
+    }
+
+    [Fact]
+    public async Task GetOrThrowAsync_WithConfigure_ThrowsWhenMissing()
+    {
+        using var services = PersistenceFixture.Build();
+        using var scope = services.CreateScope();
+        var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var repo = uow.GetRepository<WidgetView>();
+
+        var act = async () => await repo.GetOrThrowAsync("missing", static _ => { }, CancellationToken.None);
+        await act.Should().ThrowAsync<PersistenceEntityNotFoundException>();
     }
 }
