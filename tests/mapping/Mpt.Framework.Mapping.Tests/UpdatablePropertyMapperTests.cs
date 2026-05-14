@@ -144,6 +144,21 @@ public class UpdatablePropertyMapperTests : IDisposable
     }
 
     [Fact]
+    public void UpdatableMappingFactory_WithNullEntity_ShouldThrowArgumentExceptionMentioningNull()
+    {
+        // Hits the `entity?.GetType().Name ?? "null"` branch — same throw, but the null-coalesce
+        // path on the right-hand side of `??` only fires when the entity argument itself is null.
+        var factory = new OrderSummaryFactory();
+        var input = new OrderSummaryDto { ItemCount = 1, TotalAmount = 10m };
+
+        var exception = Assert.Throws<ArgumentException>(
+            () => ((IUpdatableMappingFactory)factory).TryUpdate(input, entity: null!, out _));
+
+        exception.Message.Should().Contain("Invalid entity type");
+        exception.Message.Should().Contain("null");
+    }
+
+    [Fact]
     public void UpdatableMappingFactory_GetStorageExpression_ShouldReturnValidExpression()
     {
         var factory = new OrderSummaryFactory();

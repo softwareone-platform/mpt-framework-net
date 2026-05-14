@@ -195,18 +195,25 @@ public class EfCoreDynamicEntityMapperHookTests : IDisposable
     }
 
     [Fact]
-    public async Task EnsureCollectionLoadedAsync_WithUntrackedEntity_BehavesConsistently()
+    public async Task EnsureCollectionLoadedAsync_WithUntrackedEntity_DoesNotThrow()
     {
+        // Calling EnsureCollectionLoadedAsync on an entity that hasn't been added to the
+        // change tracker shouldn't crash. EF Core's Entry(entity) call promotes the entity
+        // to Detached and the method proceeds — whether it ultimately returns true or
+        // false is provider-specific, so we only pin the "does not throw" contract.
         SetupTest();
         var untrackedEntity = new TestDbEntity { Id = "untracked-entity" };
 
         var ensureCollectionMethod = typeof(EfCoreDynamicEntityMapper).GetMethod("EnsureCollectionLoadedAsync", BindingFlags.NonPublic | BindingFlags.Instance);
         var itemsProperty = typeof(TestDbEntity).GetProperty(nameof(TestDbEntity.Items))!;
-        var task = (Task<bool>)ensureCollectionMethod!.Invoke(_mapper!, [untrackedEntity, itemsProperty])!;
-        var result = await task;
 
-        // EF Core's behavior for an untracked entity here is implementation-defined; assert it does not throw.
-        _ = result; // result is implementation-defined; assertion is "did not throw".
+        var act = async () =>
+        {
+            var task = (Task<bool>)ensureCollectionMethod!.Invoke(_mapper!, [untrackedEntity, itemsProperty])!;
+            await task;
+        };
+
+        await act.Should().NotThrowAsync();
     }
 
     [Fact]
@@ -247,8 +254,12 @@ public class EfCoreDynamicEntityMapperHookTests : IDisposable
     }
 
     [Fact]
-    public async Task EnsureCollectionLoadedAsync_WithSkipNavigation_ShouldHandleCorrectly()
+    public async Task EnsureCollectionLoadedAsync_WithSkipNavigation_DoesNotThrow()
     {
+        // Skip navigations (many-to-many via join entity) are detected via
+        // FindSkipNavigation rather than FindNavigation. The hook's outcome depends
+        // on the EF Core provider — InMemory in particular has limited support — so
+        // we only pin the "does not throw" contract.
         SetupTest();
         var target = new TestEntityWithSkipNavigation { Id = "entity-with-skip-nav" };
         _dbContext!.TestEntitiesWithSkipNav.Add(target);
@@ -256,10 +267,14 @@ public class EfCoreDynamicEntityMapperHookTests : IDisposable
 
         var ensureCollectionMethod = typeof(EfCoreDynamicEntityMapper).GetMethod("EnsureCollectionLoadedAsync", BindingFlags.NonPublic | BindingFlags.Instance);
         var skipNavProperty = typeof(TestEntityWithSkipNavigation).GetProperty(nameof(TestEntityWithSkipNavigation.RelatedEntities))!;
-        var task = (Task<bool>)ensureCollectionMethod!.Invoke(_mapper!, [target, skipNavProperty])!;
-        var result = await task;
 
-        _ = result; // result is implementation-defined; assertion is "did not throw".
+        var act = async () =>
+        {
+            var task = (Task<bool>)ensureCollectionMethod!.Invoke(_mapper!, [target, skipNavProperty])!;
+            await task;
+        };
+
+        await act.Should().NotThrowAsync();
     }
 
     [Fact]
