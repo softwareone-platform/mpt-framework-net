@@ -1,4 +1,5 @@
 using Mpt.Rql;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Mpt.Framework.Mapping;
@@ -19,10 +20,12 @@ public class InMemoryEntityMapper(IServiceProvider serviceProvider, IRqlMapAcces
         => Task.FromResult(true);
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage(Justification = "Not reachable through this mapper: UseAssignForPlatformEntities is false so MappingExecutor never invokes FindEntityAsync. The override exists to honor the abstract contract.")]
     protected internal override Task<object?> FindEntityAsync(Type entityType, object entity)
         => Task.FromResult<object?>(null);
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage(Justification = "Not reachable through this mapper: UseAssignForPlatformEntities is false so MappingExecutor walks platform references in place and never invokes UpdatePlatformEntityReference.")]
     protected internal override Task<int> UpdatePlatformEntityReference(object declaringObject, PropertyInfo property, object? entity)
         => Task.FromResult(0);
 }

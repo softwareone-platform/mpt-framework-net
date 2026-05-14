@@ -1,8 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Mpt.Framework.Operation.Models.Messages;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mpt.Framework.Operation.Communication;
 
+[ExcludeFromCodeCoverage(Justification = "Thin facade that resolves IOperationMessageSender<TContract> from DI and forwards.")]
 internal class OperationDispatcher(IServiceProvider serviceProvider) : IOperationDispatcher
 {
     public async Task CancelAsync<TContract>(Guid operationId, CancellationToken cancellationToken)

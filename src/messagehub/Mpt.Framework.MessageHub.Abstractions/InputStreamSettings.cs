@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Mpt.Framework.MessageHub;
 
+[ExcludeFromCodeCoverage(Justification = "POCO settings carrier with auto-properties and constant defaults.")]
 public class InputStreamSettings
 {
     public int MaxDeliveryCount { get; set; } = 3;

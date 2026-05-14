@@ -1,10 +1,12 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 
 namespace Mpt.Framework.MessageHub;
 
+[ExcludeFromCodeCoverage(Justification = "BackgroundService loop that drains the Channel<TracedTransport<EventMessage>> in Background publish mode; timing-driven hosting infrastructure that's awkward to assert against directly.")]
 internal partial class PlatformEventBackgroundService(
     Channel<TracedTransport<EventMessage>> channel,
     IMessageHubPublisher publisher,
