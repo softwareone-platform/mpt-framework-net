@@ -167,7 +167,7 @@ public class EntityEventProducerTests
         var pBuilder = new PersistenceBuilder(services, "billing");
         services.AddSingleton(pBuilder);
         var sp = services.BuildServiceProvider();
-        var producer = new TestProducer(sp);
+        IEntityEventProducer<TestEntity> producer = new TestProducer(sp);
 
         var entity = new TestEntity { Id = "acct-1" };
 
@@ -182,7 +182,7 @@ public class EntityEventProducerTests
         await act.Should().NotThrowAsync();
     }
 
-    private static (TestProducer Producer, IPlatformEventEmitter Emitter) BuildProducer(string moduleCode = "billing")
+    private static (IEntityEventProducer<TestEntity> Producer, IPlatformEventEmitter Emitter) BuildProducer(string moduleCode = "billing")
     {
         var services = new ServiceCollection();
         var emitter = Substitute.For<IPlatformEventEmitter>();
