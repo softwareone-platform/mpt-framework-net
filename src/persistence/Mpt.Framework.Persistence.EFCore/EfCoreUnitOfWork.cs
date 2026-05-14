@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Mpt.Framework.Persistence;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mpt.Framework.Persistence.EFCore;
 
@@ -11,6 +12,7 @@ namespace Mpt.Framework.Persistence.EFCore;
 /// that domain events emitted in the after-save phase only fire after the SQL
 /// transaction successfully commits.
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "Transaction wrapper around UnitOfWork; the supports-transactions branch requires a real relational provider so it cannot be exercised under the InMemory test fixture.")]
 public class EfCoreUnitOfWork(
     IServiceProvider serviceProvider,
     ILogger<UnitOfWork> logger,

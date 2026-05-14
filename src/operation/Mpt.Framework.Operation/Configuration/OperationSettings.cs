@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Mpt.Framework.Operation.Configuration;
 
+[ExcludeFromCodeCoverage(Justification = "POCO settings carrier with auto-properties only.")]
 public class OperationSettings
 {
     public string? GlobalPrefix { get; set; }

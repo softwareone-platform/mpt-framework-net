@@ -10,6 +10,7 @@ using System.Text.Json;
 namespace Mpt.Framework.Operation.Activities;
 
 [SuppressMessage("Maintainability", "S2436", Justification = "Three params are needed")]
+[ExcludeFromCodeCoverage(Justification = "MassTransit IStateMachineActivity adapter; Probe/Accept/Faulted are framework hooks and Execute / CheckCondition / ProduceTasks are driven by the saga state machine.")]
 internal class OperationPreparingActivity<TOperation, TTask, TSaga>(IOperationMessageSender<TOperation> sender, IOperationProvider operationProvider,
     IOperation<TOperation, TTask> handler,
     ILogger<OperationPreparingActivity<TOperation, TTask, TSaga>> logger) : IStateMachineActivity<TSaga, OperationPreparingMessage<TOperation>>

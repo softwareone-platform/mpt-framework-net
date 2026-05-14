@@ -1,4 +1,5 @@
 using Mpt.Rql;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace Mpt.Framework.Persistence;
@@ -55,6 +56,7 @@ public interface IRepository<TEntity> : IRepository
     Task<TEntity?> GetReferenceAsync(string id, CancellationToken cancellationToken);
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage(Justification = "Default-interface bridge from IRepository (non-generic) to IRepository<TEntity>'s GetReferenceAsync. Repository<TEntity> provides its own non-default implementation, so this bridge is only reachable for third-party implementers of IRepository<TEntity> that opt into the default.")]
     async Task<object?> IRepository.GetReferenceAsObjectAsync(string id, CancellationToken cancellationToken)
         => await GetReferenceAsync(id, cancellationToken);
 

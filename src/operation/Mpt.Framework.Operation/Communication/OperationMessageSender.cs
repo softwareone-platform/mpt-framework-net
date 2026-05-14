@@ -2,9 +2,11 @@ using MassTransit;
 using Mpt.Framework.Operation.Configuration;
 using Mpt.Framework.Operation.Models.Messages;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Mpt.Framework.Operation.Communication;
 
+[ExcludeFromCodeCoverage(Justification = "Thin MassTransit IBus adapter; wires send-endpoint resolution and message headers and is driven by real MassTransit dispatch.")]
 internal class OperationMessageSender<TOperation> : IOperationMessageSender<TOperation>
     where TOperation : IOperationContract
 {

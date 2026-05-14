@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Mpt.Rql;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Mpt.Framework.Mapping;
@@ -70,6 +71,7 @@ public class EfCoreDynamicEntityMapper(IServiceProvider serviceProvider, IRqlMap
     }
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage(Justification = "Reverse foreign-key handling requires an EF Core navigation whose FK lives on the dependent side; the InMemory provider used by the test fixtures cannot model that shape so the reverse-FK branch is unreachable under tests.")]
     protected override async Task<int> UpdatePlatformEntityReference(object declaringObject, PropertyInfo property, object? entity)
     {
         var entry = GetEntry(declaringObject);

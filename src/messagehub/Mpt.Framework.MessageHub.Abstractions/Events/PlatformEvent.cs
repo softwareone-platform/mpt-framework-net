@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Mpt.Framework.MessageHub;
 
 /// <summary>
@@ -86,12 +88,14 @@ public abstract class PlatformEvent : IPlatformEvent
 
     public bool IsSuppressed => _customization?.IsSuppressed ?? false;
 
+    [ExcludeFromCodeCoverage(Justification = "Protected static helper exposed for subclass authors; built-in event types build their EventMessageObjects through EventObjectFactory directly.")]
     protected static EventMessageObject MakeAdditionalEntityObject<TEntity>(
         TEntity entity,
         string key)
         where TEntity : IPlatformEntity
         => EventObjectFactory.MakeAdditional(entity, key);
 
+    [ExcludeFromCodeCoverage(Justification = "Protected static helper exposed for subclass authors to build additional custom-shaped EventMessageObjects.")]
     protected static EventMessageObject MakeAdditionalEntityObject(
         object data,
         string id,
@@ -99,6 +103,7 @@ public abstract class PlatformEvent : IPlatformEvent
         string entityName)
         => EventObjectFactory.MakeAdditionalCustom(data, id, key, entityName);
 
+    [ExcludeFromCodeCoverage(Justification = "Protected static helper exposed for subclass authors; built-in event types call EventObjectFactory.Make directly.")]
     protected static EventMessageObject MakeEntityObject<TEntity>(
         TEntity entity,
         string key,
@@ -106,6 +111,7 @@ public abstract class PlatformEvent : IPlatformEvent
         where TEntity : IPlatformEntity
         => EventObjectFactory.Make(entity, key, isOriginalValue);
 
+    [ExcludeFromCodeCoverage(Justification = "Protected static helper exposed for subclass authors that need to attach a category to the message object.")]
     protected static EventMessageObject MakeEntityObject<TEntity>(
         TEntity entity,
         string key,
