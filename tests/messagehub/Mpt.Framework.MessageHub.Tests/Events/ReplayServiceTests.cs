@@ -77,6 +77,59 @@ public class ReplayServiceTests
         await act.Should().ThrowAsync<ArgumentException>();
     }
 
+    [Fact]
+    public async Task ReplayAsync_WithConfigureAction_AppliesConfiguredRetryPolicy()
+    {
+        // Exercises the default-interface overload that takes Action<RetryPolicy> and routes
+        // the message through the message's own Routing.Stream (no explicit override).
+        var publisher = Substitute.For<IPlatformMessagePublisher>();
+        IPlatformMessageReplayService service = new PlatformMessageReplayService(publisher);
+        var message = MakeMessage();
+
+        var result = await service.ReplayAsync(
+            message,
+            "billing",
+            policy => policy.InitialDelay = TimeSpan.FromSeconds(10),
+            CancellationToken.None);
+
+        result.Should().BeTrue();
+        message.Replays.Should().Be(1);
+        message.Routing.Delay.Should().Be(TimeSpan.FromSeconds(10));
+    }
+
+    [Fact]
+    public async Task ReplayAsync_WithStreamAndConfigureAction_OverridesBoth()
+    {
+        // Exercises the default-interface overload that takes both stream and Action<RetryPolicy>.
+        var publisher = Substitute.For<IPlatformMessagePublisher>();
+        IPlatformMessageReplayService service = new PlatformMessageReplayService(publisher);
+        var message = MakeMessage();
+
+        await service.ReplayAsync(
+            message,
+            "billing",
+            StreamTypes.Sync,
+            policy => policy.InitialDelay = TimeSpan.FromSeconds(15),
+            CancellationToken.None);
+
+        message.Routing.Stream.Should().Be(StreamTypes.Sync);
+        message.Routing.Delay.Should().Be(TimeSpan.FromSeconds(15));
+    }
+
+    [Fact]
+    public async Task ReplayAsync_WithExplicitRetryPolicy_UsesPolicyValues()
+    {
+        // Exercises the default-interface overload that takes a pre-built RetryPolicy.
+        var publisher = Substitute.For<IPlatformMessagePublisher>();
+        IPlatformMessageReplayService service = new PlatformMessageReplayService(publisher);
+        var message = MakeMessage();
+        var policy = new RetryPolicy { InitialDelay = TimeSpan.FromSeconds(20) };
+
+        await service.ReplayAsync(message, "billing", policy, CancellationToken.None);
+
+        message.Routing.Delay.Should().Be(TimeSpan.FromSeconds(20));
+    }
+
     private static EventMessage MakeMessage() => new()
     {
         Id = Guid.NewGuid().ToString(),

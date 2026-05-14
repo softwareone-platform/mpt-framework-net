@@ -126,6 +126,21 @@ public class PlatformEventEmitterTests
             Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Register_WithEnumerable_EnqueuesEachEventForEmission()
+    {
+        var publisher = Substitute.For<IPlatformMessagePublisher>();
+        var sp = new ServiceCollection().BuildServiceProvider();
+        var emitter = new PlatformEventEmitter(publisher, sp);
+
+        IEnumerable<IPlatformEvent> batch = [MakeEvent("acct-1"), MakeEvent("acct-2"), MakeEvent("acct-3")];
+        emitter.Register(batch);
+
+        await emitter.EmitAsync(CancellationToken.None);
+
+        await publisher.Received(3).PublishAsync(Arg.Any<TracedTransport<EventMessage>>(), Arg.Any<CancellationToken>());
+    }
+
     private static GenericCreatedEvent<TestEntity> MakeEvent(string id) =>
         new("billing", new TestEntity { Id = id }, new PlatformEventPermissionsBuilder());
 }
