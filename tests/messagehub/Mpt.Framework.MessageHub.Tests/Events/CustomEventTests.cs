@@ -33,4 +33,16 @@ public class CustomEventTests
         message.Info.Summary.Should().Be("Billing reconciled");
         message.Info.Description.Should().Be("The billing record was reconciled.");
     }
+
+    [Fact]
+    public void MakeMessage_WithoutCustomize_FallsBackToUnconfiguredSummaryAndDescription()
+    {
+        var entity = new TestEntity { Id = "acct-1" };
+        var @event = new CustomEvent<TestEntity>("billing", entity, null, new PlatformEventPermissionsBuilder());
+
+        var message = @event.MakeMessage();
+
+        message.Info.Summary.Should().Be("unconfigured_event");
+        message.Info.Description.Should().Be("unconfigured_event");
+    }
 }

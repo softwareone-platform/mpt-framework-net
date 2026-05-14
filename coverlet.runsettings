@@ -6,6 +6,7 @@
         <Configuration>
           <Format>opencover</Format>
           <Exclude>[xunit.*]*,[*.Tests]*</Exclude>
+          <ExcludeByAttribute>GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
           <!--
             Public-API interfaces with default-implementation convenience overloads.
             Coverlet otherwise counts the default-method bodies as "to-cover" lines,

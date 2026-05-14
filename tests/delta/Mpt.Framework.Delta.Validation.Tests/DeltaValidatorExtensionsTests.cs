@@ -1,5 +1,7 @@
 using FluentValidation;
+using FluentValidation.Validators;
 using Mpt.Framework.Delta.Validation.Tests.Utility;
+using System.Reflection;
 
 namespace Mpt.Framework.Delta.Validation.Tests;
 
@@ -155,6 +157,21 @@ public class DeltaValidatorExtensionsTests
         result.Errors.Should().ContainSingle().Which.PropertyName.Should().Be("address.city");
     }
 
+    [Fact]
+    public void WhenDefined_NoArguments_ChainedAfterMustBeDefined_AlsoKeepsChainAlive()
+    {
+        // Same shape as the previous test, but starting from MustBeDefined's IRuleBuilderOptions
+        // result rather than RuleForDelta's IRuleBuilderInitial. Hits the IRuleBuilder overload
+        // of the no-arg WhenDefined (the sibling of the IRuleBuilderInitial overload above).
+        var inner = new InlineAddressValidator(a => a.RuleForDelta(x => x.City).MustBeDefined());
+        var validator = new InlineValidator(v =>
+            v.RuleForDelta(u => u.Address).MustBeDefined().WhenDefined()!.SetValidator(inner));
+
+        var result = validator.Validate(DeltaBuilder.FromJson<TestUser>("""{"address":{"street":"Main"}}"""));
+
+        result.Errors.Should().ContainSingle().Which.PropertyName.Should().Be("address.city");
+    }
+
     // ----- ForEachDelta -----
 
     [Fact]
@@ -202,6 +219,26 @@ public class DeltaValidatorExtensionsTests
             """));
 
         result.Errors.Should().ContainSingle().Which.PropertyName.Should().Be("address.city");
+    }
+
+    // ----- EmptyValidator (private nested type) -----
+
+    [Fact]
+    public void EmptyValidator_NameAndDefaultMessageTemplate_AreReachable()
+    {
+        // EmptyValidator is the no-op IPropertyValidator that WhenDefined attaches via
+        // SetValidator. It only fires when t.IsDefined, and IsValid always returns true,
+        // so Name / GetDefaultMessageTemplate are never exercised by normal validation
+        // flows. Reach them directly so the IPropertyValidator contract surface is
+        // covered.
+        var validatorType = typeof(DeltaValidatorExtensions)
+            .GetNestedType("EmptyValidator`1", BindingFlags.NonPublic)!
+            .MakeGenericType(typeof(string));
+
+        var validator = (IPropertyValidator)Activator.CreateInstance(validatorType)!;
+
+        validator.Name.Should().Be("Empty");
+        validator.GetDefaultMessageTemplate("any-code").Should().Be(string.Empty);
     }
 
     // ----- helpers -----
